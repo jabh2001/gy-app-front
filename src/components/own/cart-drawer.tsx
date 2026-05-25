@@ -1,4 +1,4 @@
-import { X, Minus, Plus, ShoppingCart, ArrowRight } from "lucide-react";
+import { X, Minus, Plus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Sheet, 
@@ -7,7 +7,6 @@ import {
   SheetTitle, 
   SheetClose 
 } from "@/components/ui/sheet";
-import { Progress } from "@/components/ui/progress";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -15,7 +14,6 @@ interface CartDrawerProps {
 }
 
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
-  // Datos de ejemplo basados en image_7fbfff.png
   const cartItems = [
     {
       id: 1,
@@ -26,26 +24,26 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     }
   ];
 
-  const subtotal = 7.62;
-  const taxes = 1.37;
-  const total = 8.99;
-  const freeShippingThreshold = 50;
-  const awayFromFreeShipping = 41.01;
-  const progressValue = (total / freeShippingThreshold) * 100;
+  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-full sm:max-w-[400px] p-0 flex flex-col border-l-0">
-        {/* Header del Carrito */}
-        <SheetHeader className="p-4 border-b flex flex-row items-center justify-between space-y-0">
-          <div className="flex items-center gap-2">
-            <ShoppingCart size={20} />
-            <SheetTitle className="text-sm font-bold uppercase tracking-tight">
-              Your Cart <span className="text-gray-400 font-medium normal-case">(Clear Cart)</span>
+        <SheetHeader className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <div>
+            <SheetTitle className="text-lg font-bold uppercase tracking-tight text-slate-900">
+              Mi carrito
             </SheetTitle>
+            <p className="text-xs text-slate-500">Tus productos seleccionados</p>
           </div>
-          <SheetClose className="rounded-full hover:bg-gray-100 p-1">
-            <X size={20} />
+          <SheetClose asChild>
+            <button
+              type="button"
+              aria-label="Cerrar carrito"
+              className="rounded-xl border border-slate-200 bg-white p-2 text-slate-900 transition hover:bg-slate-100"
+            >
+              <X size={18} />
+            </button>
           </SheetClose>
         </SheetHeader>
 
@@ -77,41 +75,17 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           ))}
         </div>
 
-        {/* Footer con Totales y Barra de Progreso */}
-        <div className="p-6 bg-white border-t space-y-6">
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between font-bold">
-              <span>Subtotal</span>
-              <span>€ {subtotal}</span>
-            </div>
-            <div className="flex justify-between font-bold">
-              <span>Taxes</span>
-              <span>€ {taxes}</span>
-            </div>
-            <div className="text-right">
-              <button className="text-[10px] uppercase font-bold text-sky-600 hover:underline">
-                Apply promo code
-              </button>
-            </div>
+        <div className="p-6 bg-white border-t border-slate-200 space-y-5">
+          <div className="flex items-center justify-between text-sm text-slate-600">
+            <span>Total</span>
+            <span className="font-bold text-slate-900">€ {total.toFixed(2)}</span>
           </div>
 
-          {/* Barra de Envío Gratis (image_7fbfff.png) */}
-          <div className="space-y-2">
-            <p className="text-[11px] font-medium text-gray-600">
-              You're <span className="font-bold">€ {awayFromFreeShipping}</span> away from <span className="font-bold">free shipping!</span>
-            </p>
-            <Progress value={progressValue} className="h-2 bg-gray-100" />
-          </div>
-
-          {/* Botón de Checkout */}
-          <Button className="w-full bg-[#E6E600] hover:bg-yellow-500 text-black font-black italic uppercase h-14 rounded-md text-lg flex justify-between px-6">
-             <div className="flex flex-col items-start leading-none">
-                <span className="text-[10px] font-bold">1 items</span>
-                <span>€ {total}</span>
-             </div>
-             <div className="flex items-center gap-2">
-                Proceed To Checkout <ArrowRight size={18} />
-             </div>
+          <Button className="w-full rounded-xl bg-[#E6E600] px-6 py-4 text-base font-black text-black transition hover:bg-yellow-400">
+            <div className="flex w-full items-center justify-between">
+              <span>Finalizar compra</span>
+              <ArrowRight size={18} />
+            </div>
           </Button>
         </div>
       </SheetContent>

@@ -6,7 +6,7 @@ interface Product {
   id: number;
   name: string;
   price: number;
-  image: string;
+  image?: string;
 }
 
 export function ProductCard({ product }: { product: Product }) {
@@ -17,17 +17,17 @@ export function ProductCard({ product }: { product: Product }) {
           <img
             src={product.image}
             alt={product.name}
-            className="size-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="size-full object-contain group-hover:scale-105 transition-transform duration-500"
           />
         </div>
 
         <div className="text-center space-y-2">
           {/* Usamos secondary para el color del título del producto */}
           <h4 className="text-secondary text-sm font-medium line-clamp-1 px-2 group-hover:underline cursor-pointer">
-            {product.name}
+            {product.name.toUpperCase()}
           </h4>
           <p className="text-foreground text-lg font-black tracking-tight">
-            € {product.price.toFixed(2)}
+            {product.price.toFixed(2)}
           </p>
         </div>
       </CardContent>
