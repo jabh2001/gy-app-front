@@ -23,3 +23,8 @@ export function useFeatured(defaultValue: "true" | "false" | "all" = "all") {
 export function useOnSale(defaultValue: "true" | "false" | "all" = "all") {
   return useQueryState("on_sale", parseAsStringLiteral(booleanState).withDefault(defaultValue))
 }
+
+const parentState = ['none', "all"] as const;
+export function useParent(defaultValue: "none" | "all" = "all") {
+  return useQueryState("parent", parseAsStringLiteral(parentState).withDefault(defaultValue))
+}

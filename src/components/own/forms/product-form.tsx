@@ -2,10 +2,10 @@ import { useEffect, useState, useCallback } from "react"
 import { ImagePlus, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-// import {
-//   FileUpload,
-//   FileUploadTrigger,
-// } from "@/components/ui/file-upload"
+import {
+  FileUpload,
+  FileUploadTrigger,
+} from "@/components/ui/file-upload"
 import AdminForm from "./admin-form"
 import { NativeImageCheckbox } from "@/components/uitripled/native-image-checkbox-shadcnui"
 
@@ -72,31 +72,31 @@ export default function ProductForm({ data, onSave, onEdit, submitLabel = "Guard
     [],
   )
 
-  // const handleImagesChange = useCallback((images: File[]) => {
-  //   console.log("Selected images:", images)
-  //   setFormState((prev) => ({
-  //     ...prev,
-  //     images,
-  //     mainImageIndex: Math.min(prev.mainImageIndex, Math.max(images.length - 1, 0)),
-  //   }))
-  // }, [])
+  const handleImagesChange = useCallback((images: File[]) => {
+    console.log("Selected images:", images)
+    setFormState((prev) => ({
+      ...prev,
+      images,
+      mainImageIndex: Math.min(prev.mainImageIndex, Math.max(images.length - 1, 0)),
+    }))
+  }, [])
 
-  // const handleRemove = (index: number) => {
-  //   setFormState((prev) => ({
-  //     ...prev,
-  //     images: prev.images.filter((_, i) => i !== index),
-  //     mainImageIndex: Math.min(prev.mainImageIndex, Math.max(prev.images.length - 2, 0)),
-  //   }))
-  // };
+  const handleRemove = (index: number) => {
+    setFormState((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+      mainImageIndex: Math.min(prev.mainImageIndex, Math.max(prev.images.length - 2, 0)),
+    }))
+  };
 
   const buildFormData = useCallback(() => {
     const formData = new FormData()
-    formData.append('name', formState.name)
-    formData.append('sku', formState.sku)
-    formData.append('price', formState.price)
-    formData.append('sale_price', formState.sale_price)
-    formData.append('stock', formState.stock)
-    formData.append('badge', formState.badge)
+    formState.name && formData.append('name', formState.name)
+    formState.sku && formData.append('sku', formState.sku)
+    formState.price && formData.append('price', formState.price)
+    formState.sale_price && formData.append('sale_price', formState.sale_price)
+    formState.stock && formData.append('stock', formState.stock)
+    formState.badge && formData.append('badge', formState.badge)
     formData.append('description', formState.description)
     formData.append('is_featured', formState.isFeatured ? 'true' : 'false')
     formData.append('is_on_sale', formState.isOnSale ? 'true' : 'false')
@@ -186,7 +186,7 @@ export default function ProductForm({ data, onSave, onEdit, submitLabel = "Guard
           />
         </label>
       </div>
-{/* 
+
       <div className="grid gap-3">
         Imágenes del producto
         <FileUpload
@@ -223,7 +223,7 @@ export default function ProductForm({ data, onSave, onEdit, submitLabel = "Guard
             Imagen existente: {formState.mainImage}
           </div>
         ) : null}
-      </div> */}
+      </div>
 
       <label className="grid gap-1 text-sm font-medium">
         Descripción

@@ -1,37 +1,12 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom"
-import {
-  LayoutDashboard,
-  Package,
-  Tags,
-  ShoppingBag,
-  Users,
-  Settings,
-  Store,
-  PanelLeft,
-  EthernetPort,
-} from "lucide-react"
-
+import { useEffect } from "react"
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom"
+import { LayoutDashboard, Package, Tags, ShoppingBag, Users, Settings, Store, PanelLeft, EthernetPort } from "lucide-react"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarRail,
-  SidebarTrigger,
-  useSidebar,
-} from "@/components/ui/sidebar"
 import { useTitleStore } from "@/hooks/use-title"
-import { useEffect } from "react"
+import { useSession } from "@/hooks/use-session"
 
 const navItems = [
   {
@@ -74,10 +49,25 @@ const navItems = [
 ]
 
 export default function AdminLayout() {
+  const checkSession = useSession((state) => state.checkSession);
+  const user = useSession((state) => state.user);
+  const hasCheckedSession = useSession((state) => state.hasCheckedSession);
   const title = useTitleStore((state) => state.title)
+  const viewPrevButton = useTitleStore((state) => state.viewPrevButton)
+  const navigate = useNavigate()
+
+  
   useEffect(() => {
     document.title = title ? `${title} | Tienda Admin` : "Tienda Admin"
   }, [title])
+  useEffect(() => {
+    hasCheckedSession && !user && navigate("/login")
+  }, [user])
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
+
+  // if (!hasCheckedSession) return null;
   return (
     <SidebarProvider>
       <AdminSidebar />
@@ -96,6 +86,11 @@ export default function AdminLayout() {
               Gestiona productos, categorías, pedidos, usuarios y ajustes.
             </p> */}
           </div>
+          {viewPrevButton && <div className="flex-1 flex justify-end">
+            <Button variant="outline" onClick={() => navigate(-1)}>
+              Regresar
+            </Button>
+          </div>}
         </header>
 
         <main className="min-h-[calc(100vh-4rem)] bg-muted/30">

@@ -8,6 +8,7 @@ export interface CategoryFormData {
   slug: string
   description: string
   isFeatured: boolean
+  isActive: boolean
 }
 
 interface CategoryFormProps {
@@ -23,6 +24,7 @@ export default function CategoryForm({ data, onSave, onEdit, submitLabel = "Guar
     slug: "",
     description: "",
     isFeatured: false,
+    isActive:true
   })
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function CategoryForm({ data, onSave, onEdit, submitLabel = "Guar
       return
     }
     onSave(formState)
-    setFormState({ name: "", slug: "", description: "", isFeatured: false })
+    setFormState({ name: "", slug: "", description: "", isFeatured: false , isActive: false })
   }
 
   return (
@@ -79,6 +81,15 @@ export default function CategoryForm({ data, onSave, onEdit, submitLabel = "Guar
           onChange={(event) => handleChange("description", event.target.value)}
           placeholder="Categoría para camisetas, remeras y polos."
         />
+      </label>
+      <label className="inline-flex items-center gap-2 text-sm font-medium">
+        <input
+          type="checkbox"
+          checked={formState.isActive}
+          onChange={(event) => handleChange("isActive", event.target.checked)}
+          className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+        />
+        Categoría activa
       </label>
       <label className="inline-flex items-center gap-2 text-sm font-medium">
         <input

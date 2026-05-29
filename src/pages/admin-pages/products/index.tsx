@@ -1,19 +1,21 @@
 import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { Grip, Search, Upload, } from "lucide-react"
+
+import useTitle from "@/hooks/use-title"
+import { useQ } from "@/hooks/api/use-query-params"
+import { useProducts } from "@/hooks/api"
+import { useDebounce } from "@/hooks/use-debounce"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { useProducts } from "@/hooks/api"
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
+
 import ImportInventory from "./components/import-inventory"
 import ProductCard from "./components/ProductCard"
 import SortSelect from "./components/sort-select"
-import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
-import { useNavigate } from "react-router-dom"
-import useTitle from "@/hooks/use-title"
 import FilterSelect from "./components/filter-select"
-import { useQ } from "@/hooks/api/use-query-params"
-import { useDebounce } from "@/hooks/use-debounce"
 
 export default function ProductsAdminIndex() {
   useTitle("Productos - Panel de administración")

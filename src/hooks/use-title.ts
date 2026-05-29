@@ -6,14 +6,18 @@ import {create} from "zustand"
 type TitleState = {
   title: string
   setTitle: (title: string) => void
+  viewPrevButton:boolean
+  setViewPrevButton:(view: boolean) => void
 }
 export const useTitleStore = create<TitleState>()((set) => ({
   title: "Aplicacion de gestión de inventario",
-  setTitle: (title: string) => set({ title })
+  setTitle: (title: string) => set({ title }),
+  viewPrevButton:false,
+  setViewPrevButton:(viewPrevButton) => set ({ viewPrevButton })
 }))
 
 
-export default function useTitle(title: string) {
+export function useTitle(title: string) {
   const { setTitle } = useTitleStore()
 
   useEffect(() => {
@@ -25,3 +29,17 @@ export default function useTitle(title: string) {
 
   return useTitleStore((state) => state.title)
 }
+
+export function useViewPrevButton(viewPrevButton = false){
+  const setViewPrevButton = useTitleStore((state) => state.setViewPrevButton)
+
+  useEffect(() => {
+    setViewPrevButton(viewPrevButton)
+    return () => {
+        setViewPrevButton(false)
+    }
+  }, [viewPrevButton])
+  
+  return useTitleStore((state) => state.viewPrevButton)
+}
+export default useTitle

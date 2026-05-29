@@ -1,59 +1,71 @@
-import { useMemo } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import type { CategoryFormData } from "@/components/own/forms/category-form"
+import useTitle, { useViewPrevButton } from "@/hooks/use-title"
+import { useCategoryDetail, useUpdateCategory } from "@/hooks/api"
+import CategoryForm from "@/components/own/forms/category-form"
+import type { Category } from "@/api/models"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 
-const mockCategories: CategoryFormData[] = [
-  { id: 1, name: "Camisetas", slug: "camisetas", description: "Ropa para hombre y mujer.", isFeatured: true },
-  { id: 2, name: "Accesorios", slug: "accesorios", description: "Bolsos, gorras y complementos.", isFeatured: false },
-]
 
 export default function CategoriesAdminDetail() {
+  useViewPrevButton(true)
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const { data: category } = useCategoryDetail(id)
+  useTitle(category ? `${category.name.toUpperCase()}` : "Detalle de categoría")
+  const updateCategoryMutation = useUpdateCategory()
+  const handleEdit = async (payload: Partial<Category>) => {
+    if (!id) {
+      navigate(-1)
+      return
+    }
 
-  const category = useMemo(
-    () => mockCategories.find((item) => item.id === Number(id)),
-    [id]
-  )
+    try {
+      await updateCategoryMutation.mutateAsync({ categoryId: Number(id), payload })
+      navigate(-1)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Detalle de categoría</h1>
-          <p className="text-sm text-muted-foreground">Visualiza todos los datos de la categoría seleccionada.</p>
-        </div>
-        <Button variant="outline" onClick={() => navigate(-1)}>
-          Regresar
-        </Button>
-      </div>
-
-      {category ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{category.name}</CardTitle>
-            <CardDescription>{category.description}</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div>
-              <p className="text-sm font-medium">Slug</p>
-              <p className="text-foreground">{category.slug}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Destacado</p>
-              <p className="text-foreground">{category.isFeatured ? "Sí" : "No"}</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">No se encontró la categoría solicitada.</p>
-          </CardContent>
-        </Card>
-      )}
+    <div className="">
+      { Array.isArray(category?.path) && category.path.length > 1 && <Breadcrumb className="p-4">
+        <BreadcrumbList>
+          {
+            category.path.map((cat, i, path) => (
+              <>
+                <BreadcrumbItem key={`breadcrumbs_${cat.id}`}>
+                  <BreadcrumbLink>
+                    <Link to={`/admin/categories/detail/${cat.id}`}>
+                      {cat.name}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                {i+1 < path.length && <BreadcrumbSeparator /> }
+              </>
+            ))
+          }
+        </BreadcrumbList>
+      </Breadcrumb>}
+      {category && <CategoryForm
+        data={mapCategorytToFormData(category)}
+        onEdit={handleEdit}
+        submitLabel="Editar categoría"
+        onSave={() => { }}
+      />}
     </div>
   )
+}
+
+function mapCategorytToFormData(product: Category): CategoryFormData {
+  return {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    description: product.description ?? "",
+    isFeatured: product.is_featured,
+    isActive: product.is_active,
+  }
 }

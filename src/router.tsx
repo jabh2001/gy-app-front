@@ -7,6 +7,8 @@ import ShopPage from './pages/shop-page'
 import LoginPage from '@/pages/login-page'
 import RegisterPage from '@/pages/register-page'
 import CartPage from '@/pages/cart-page'
+import ProfilePage from '@/pages/profile-page'
+import LogoutPage from '@/pages/logout-page'
 import AdminHomePage from '@/pages/admin-pages/admin-home-page'
 import ProductsIndex from '@/pages/admin-pages/products/index'
 import ProductsForm from '@/pages/admin-pages/products/form'
@@ -21,8 +23,6 @@ import UsersIndex from '@/pages/admin-pages/users/index'
 import UsersForm from '@/pages/admin-pages/users/form'
 import UsersDetail from '@/pages/admin-pages/users/detail'
 import SettingsIndex from '@/pages/admin-pages/settings/index'
-import SettingsForm from '@/pages/admin-pages/settings/form'
-import SettingsDetail from '@/pages/admin-pages/settings/detail'
 
 // Definimos la estructura de navegación
 const router = createBrowserRouter([
@@ -33,11 +33,23 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "/about", element: <AboutPage /> },
       { path: "/contact", element: <AboutPage /> },
-      { path: "/shop", element: <ShopPage /> },
+      { 
+        path: "/shop",
+        children:[
+          { index:true, element: <ShopPage /> },
+          { path:"category/:categorySlug", element: <ShopPage /> },
+          { path:"search/:search", element: <ShopPage /> },
+        ]
+      },
       { path: "/login", element: <LoginPage /> },
       { path: "/register", element: <RegisterPage /> },
       { path: "/cart", element: <CartPage /> },
+      { path: "/profile", element: <ProfilePage /> },
     ],
+  },
+  {
+    path:"/logout",
+    element:<LogoutPage />
   },
   {
     path: "/admin",
@@ -61,9 +73,6 @@ const router = createBrowserRouter([
       { path: "users/edit/:id", element: <UsersForm /> },
       { path: "users/detail/:id", element: <UsersDetail /> },
       { path: "settings", element: <SettingsIndex /> },
-      { path: "settings/create", element: <SettingsForm /> },
-      { path: "settings/edit/:id", element: <SettingsForm /> },
-      { path: "settings/detail/:id", element: <SettingsDetail /> },
     ],
   },
 ])

@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { BottomBarMobile } from '@/components/own/layouts/ui/bottom-bar-mobile';
 import { PageHeader } from '@/components/own/layouts/ui/page-header';
@@ -15,11 +15,25 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useTitleStore } from '@/hooks/use-title';
 import { useEffect } from 'react';
+import { useSession } from '@/hooks/use-session';
 
 const categories = ['Electrónica', 'Gaming', 'Accesorios', 'Ofertas'];
 
 export default function MainLayout() {
+    const hasCheckedSession = useSession((state) => state.hasCheckedSession);
+    const checkSession = useSession((state) => state.checkSession);
+    const user = useSession((state) => state.user);
+    const navigate = useNavigate()
     const title = useTitleStore((state) => state.title)
+
+    useEffect(() => {
+        hasCheckedSession && !user && navigate("/login")
+    }, [user])
+
+    useEffect(() => {
+        checkSession();
+    }, [checkSession]);
+
     useEffect(() => {
         document.title = title ? `${title} | Tienda Admin` : "Tienda Admin"
     }, [title])

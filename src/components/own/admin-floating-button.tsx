@@ -1,14 +1,12 @@
 import { useSession } from '@/hooks/use-session';
 import { Settings } from 'lucide-react';
-import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 export function AdminFloatingButton() {
     const hasRole = useSession(state => state.hasRole);
-    const isAdmin = useMemo(() => hasRole('admin'), [hasRole]);
 
     return (
-        <div className={`${isAdmin ? 'block' : 'hidden'} group fixed top-16 md:top-4 left-0 z-50 flex items-center justify-end`}>
+        <div className={`${hasRole('admin') ? 'block' : 'hidden'} group fixed top-16 md:top-4 left-0 z-50 flex items-center justify-end`}>
 
             <div className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-2 py-3 rounded-r-md shadow-md cursor-pointer transition-transform duration-300 transform group-hover:-translate-x-full -translate-x-full md:-translate-x-0 select-none">
                 ADMIN

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ShoppingCart, User } from 'lucide-react';
-import { Input } from "@/components/ui/input";
+import { ShoppingCart, User } from 'lucide-react';
 import { CartDrawer } from '@/components/own/cart-drawer';
 import { AccountDrawer } from '@/components/own/account-drawer';
 import { useSession } from '@/hooks/use-session';
+import GlobalSearch from '@/components/own/GlobalSearch';
 
 function PageHeader() {
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -38,13 +38,7 @@ function PageHeader() {
                             </button>
                         </div>
                         <div className="hidden lg:flex items-center gap-4">
-                            <div className="relative min-w-[520px]">
-                                <Input
-                                    placeholder="Buscar productos..."
-                                    className="w-full rounded-xl border border-slate-600 bg-white text-slate-900 px-5 py-4 shadow-sm focus-visible:ring-primary"
-                                />
-                                <Search className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500" size={22} />
-                            </div>
+                            <GlobalSearch />
 
                             <div className="flex items-center gap-3">
                                 <button
@@ -86,6 +80,8 @@ function PageHeader() {
                     loginPath="/login"
                     registerPath="/register"
                     cartPath="/cart"
+                    profilePath='/profile'
+                    logoutPath='/logout'
                 />
             </header>
     )

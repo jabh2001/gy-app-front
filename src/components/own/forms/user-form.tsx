@@ -4,10 +4,9 @@ import AdminForm from "./admin-form"
 
 export interface UserFormData {
   id?: number
-  name: string
+  username: string
   email: string
-  role: string
-  status: string
+  role: 'admin' | 'seller' | 'customer';
 }
 
 interface UserFormProps {
@@ -19,10 +18,9 @@ interface UserFormProps {
 
 export default function UserForm({ data, onSave, onEdit, submitLabel = "Guardar usuario" }: UserFormProps) {
   const [formState, setFormState] = useState<UserFormData>({
-    name: "",
+    username: "",
     email: "",
-    role: "Vendedor",
-    status: "Activo",
+    role: "admin",
   })
 
   useEffect(() => {
@@ -41,7 +39,7 @@ export default function UserForm({ data, onSave, onEdit, submitLabel = "Guardar 
       return
     }
     onSave(formState)
-    setFormState({ name: "", email: "", role: "Vendedor", status: "Activo" })
+    setFormState({ username: "", email: "", role: "admin" })
   }
 
   return (
@@ -57,8 +55,8 @@ export default function UserForm({ data, onSave, onEdit, submitLabel = "Guardar 
         <label className="grid gap-1 text-sm font-medium">
           Nombre
           <Input
-            value={formState.name}
-            onChange={(event) => handleChange("name", event.target.value)}
+            value={formState.username}
+            onChange={(event) => handleChange("username", event.target.value)}
             placeholder="Carlos Martínez"
           />
         </label>
@@ -78,14 +76,6 @@ export default function UserForm({ data, onSave, onEdit, submitLabel = "Guardar 
             value={formState.role}
             onChange={(event) => handleChange("role", event.target.value)}
             placeholder="Admin / Vendedor"
-          />
-        </label>
-        <label className="grid gap-1 text-sm font-medium">
-          Estado
-          <Input
-            value={formState.status}
-            onChange={(event) => handleChange("status", event.target.value)}
-            placeholder="Activo"
           />
         </label>
       </div>

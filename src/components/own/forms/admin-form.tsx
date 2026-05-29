@@ -22,7 +22,7 @@ export default function AdminForm({
   children,
 }: AdminFormProps) {
   return (
-    <Card>
+    <Card className="rounded-none">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description ? <div className="text-sm text-muted-foreground">{description}</div> : null}

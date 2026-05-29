@@ -1,80 +1,80 @@
-import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { Grip, Search, } from "lucide-react"
+
+import useTitle from "@/hooks/use-title"
+import { useQ } from "@/hooks/api/use-query-params"
+import { useCategories } from "@/hooks/api"
+import { useDebounce } from "@/hooks/use-debounce"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { CategoryFormData } from "@/components/own/forms/category-form"
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
 
-const mockCategories: CategoryFormData[] = [
-  { id: 1, name: "Camisetas", slug: "camisetas", description: "Ropa para hombre y mujer.", isFeatured: true },
-  { id: 2, name: "Accesorios", slug: "accesorios", description: "Bolsos, gorras y complementos.", isFeatured: false },
-]
+import SortSelect from "./components/sort-select"
+import FilterSelect from "./components/filter-select"
+import CategoriesTable from "./components/categories-table"
 
 export default function CategoriesAdminIndex() {
-  const [query, setQuery] = useState("")
+  useTitle("Categorías - Panel de administración")
+  const [query, setQuery] = useQ()
+  const debouncedQuery = useDebounce(query, 500)
   const navigate = useNavigate()
+  const { data, pagination:{ firstPage, prevPage, nextPage, page, totalPages, showedItems, total } } = useCategories({ q: debouncedQuery })
 
-  const filteredCategories = useMemo(
-    () =>
-      mockCategories.filter((category) =>
-        [category.name, category.slug, category.description].some((value) =>
-          value.toLowerCase().includes(query.toLowerCase())
-        )
-      ),
-    [query]
-  )
+  const categories = data?.items ?? []
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Categorías</h1>
-          <p className="text-sm text-muted-foreground">Administra las categorías del catálogo.</p>
+      <section className="grid gap-3 border border-border/70 bg-gray-200 p-3 shadow-sm lg:grid-cols-[auto_1fr_auto] md:items-center">
+        <div className="order-1 w-full flex flex-wrap gap-2 justify-end">
+          <Button className="h-11 rounded-2xl" onClick={() => navigate("/admin/categories/create")}>
+            <Grip />
+            Crear categoría
+          </Button>
         </div>
-        <Button onClick={() => navigate("create")}>Crear categoría</Button>
-      </div>
-
-      <div className="grid gap-4 rounded-3xl border border-border/70 bg-muted p-4 md:grid-cols-[1fr_auto]">
-        <label className="grid gap-2">
-          <span className="text-sm font-medium">Buscar</span>
+        <label className="order-0 lg:order-2 w-full relative block">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar categoría o slug"
+            onChange={(event) => {setQuery(event.target.value);firstPage()}}
+            placeholder="Buscar producto, SKU, etiqueta o descripción"
+            className="h-11 rounded-2xl bg-background pl-9"
           />
         </label>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div className="rounded-xl border border-border/70 bg-background px-4 py-3 text-sm text-muted-foreground">
-            Espacio para filtros
-          </div>
-          <div className="rounded-xl border border-border/70 bg-background px-4 py-3 text-sm text-muted-foreground">
-            Ordenar y refinamiento
-          </div>
-        </div>
-      </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {filteredCategories.map((category) => (
-          <Card key={category.id} className="space-y-4">
-            <CardHeader>
-              <CardTitle>{category.name}</CardTitle>
-              <CardDescription>{category.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-2">
-              <div className="text-sm text-muted-foreground">Slug: {category.slug}</div>
-              <div className="text-sm text-muted-foreground">Destacado: {category.isFeatured ? "Sí" : "No"}</div>
-            </CardContent>
-            <div className="flex flex-wrap items-center gap-2 px-4 pb-4">
-              <Button variant="outline" size="sm" onClick={() => navigate(`edit/${category.id}`)}>
-                Editar
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => navigate(`detail/${category.id}`)}>
-                Ver detalle
-              </Button>
-            </div>
-          </Card>
-        ))}
-      </div>
+        <div className="order-3 w-full flex flex-wrap gap-2 justify-end">
+          <FilterSelect />
+          <SortSelect />
+        </div>
+        <div className="order-4 w-full col-start-1 lg:col-end-4 flex justify-end w-full">
+          <span>
+            <Pagination>
+              <PaginationContent>
+                <span>  
+                  {`Página ${page} de ${totalPages}`}
+                </span>
+                <PaginationItem>
+                  <PaginationPrevious  text="Anterior" onClick={prevPage} />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext text="Siguiente" onClick={nextPage} />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </span>
+        </div>
+        <div className="order-5 w-full col-start-1 lg:col-end-4 flex justify-end w-full">
+          <span>
+            <p className="text-sm text-muted-foreground">
+              Mostrando <span className="font-bold text-foreground">{showedItems}</span> de{" "}
+              <span className="font-bold text-foreground">{total}</span> productos
+            </p>
+          </span>
+        </div>
+      </section>
+      <CategoriesTable
+        categories={categories}
+      />
     </div>
   )
 }

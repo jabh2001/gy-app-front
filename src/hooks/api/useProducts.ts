@@ -22,12 +22,12 @@ export function useProducts(params?: Record<string, unknown>, options?: any) {
   const [onSale, setOnSale] = useOnSale()
 
   const newParams = { sort: order, page: debouncedPage, active, featured, on_sale:onSale, ...params }
+  useEffect(() => {
+    console.log({ order, params, newParams })
+  }, [])
   const query = usePaginatedQuery<Product>(['products', newParams], BASE, newParams, options)
   const pagination = usePagination({ page, setPage, items:query.data?.items, meta:query.data?.meta })
-  useEffect(() => {
-    console.log("Query params changed:", { order, active, featured, onSale })
-    pagination.firstPage() // Reset to first page when filters or sorting change
-  }, [order, active, featured, onSale])
+  
   return {
     ...query,
     params: { 

@@ -23,6 +23,8 @@ export interface Category {
   name: string;
   slug: string;
   description?: string | null;
+  is_active: boolean;
+  is_featured: boolean;
   parent_id?: number | null;
   children_count: number;
 }

@@ -1,80 +1,78 @@
-import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { Grip, Search, } from "lucide-react"
+
+import useTitle from "@/hooks/use-title"
+import { useQ } from "@/hooks/api/use-query-params"
+import { useUsers } from "@/hooks/api"
+import { useDebounce } from "@/hooks/use-debounce"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { UserFormData } from "@/components/own/forms/user-form"
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
 
-const mockUsers: UserFormData[] = [
-  { id: 1, name: "María López", email: "maria@demo.com", role: "Admin", status: "Activo" },
-  { id: 2, name: "Pedro Ruiz", email: "pedro@demo.com", role: "Vendedor", status: "Activo" },
-]
+import SortSelect from "./components/sort-select"
+import UsersTable from "./components/users-table"
 
 export default function UsersAdminIndex() {
-  const [query, setQuery] = useState("")
+  useTitle("Usuarios - Panel de administración")
+  const [query, setQuery] = useQ()
+  const debouncedQuery = useDebounce(query, 500)
   const navigate = useNavigate()
+  const { data, pagination:{ firstPage, prevPage, nextPage, page, totalPages, showedItems, total } } = useUsers({ q: debouncedQuery })
 
-  const filteredUsers = useMemo(
-    () =>
-      mockUsers.filter((user) =>
-        [user.name, user.email, user.role, user.status].some((value) =>
-          value.toLowerCase().includes(query.toLowerCase())
-        )
-      ),
-    [query]
-  )
+  const users = data?.items ?? []
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Usuarios</h1>
-          <p className="text-sm text-muted-foreground">Gestiona los usuarios y sus roles en el panel administrativo.</p>
+      <section className="grid gap-3 border border-border/70 bg-gray-200 p-3 shadow-sm lg:grid-cols-[auto_1fr_auto] md:items-center">
+        <div className="order-1 w-full flex flex-wrap gap-2 justify-end">
+          <Button className="h-11 rounded-2xl" onClick={() => navigate("/admin/users/create")}>
+            <Grip />
+            Crear usuario
+          </Button>
         </div>
-        <Button onClick={() => navigate("create")}>Crear usuario</Button>
-      </div>
-
-      <div className="grid gap-4 rounded-3xl border border-border/70 bg-muted p-4 md:grid-cols-[1fr_auto]">
-        <label className="grid gap-2">
-          <span className="text-sm font-medium">Buscar</span>
+        <label className="order-0 lg:order-2 w-full relative block">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar usuario, email o rol"
+            onChange={(event) => { setQuery(event.target.value); firstPage() }}
+            placeholder="Buscar producto, SKU, etiqueta o descripción"
+            className="h-11 rounded-2xl bg-background pl-9"
           />
         </label>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div className="rounded-xl border border-border/70 bg-background px-4 py-3 text-sm text-muted-foreground">
-            Espacio para filtros
-          </div>
-          <div className="rounded-xl border border-border/70 bg-background px-4 py-3 text-sm text-muted-foreground">
-            Ordenar y refinamiento
-          </div>
-        </div>
-      </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {filteredUsers.map((user) => (
-          <Card key={user.id} className="space-y-4">
-            <CardHeader>
-              <CardTitle>{user.name}</CardTitle>
-              <CardDescription>{user.email}</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-2">
-              <div className="text-sm text-muted-foreground">Rol: {user.role}</div>
-              <div className="text-sm text-muted-foreground">Estado: {user.status}</div>
-            </CardContent>
-            <div className="flex flex-wrap items-center gap-2 px-4 pb-4">
-              <Button variant="outline" size="sm" onClick={() => navigate(`edit/${user.id}`)}>
-                Editar
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => navigate(`detail/${user.id}`)}>
-                Ver detalle
-              </Button>
-            </div>
-          </Card>
-        ))}
-      </div>
+        <div className="order-3 w-full flex flex-wrap gap-2 justify-end">
+          <SortSelect />
+        </div>
+        <div className="order-4 w-full col-start-1 lg:col-end-4 flex justify-end w-full">
+          <span>
+            <Pagination>
+              <PaginationContent>
+                <span>
+                  {`Página ${page} de ${totalPages}`}
+                </span>
+                <PaginationItem>
+                  <PaginationPrevious text="Anterior" onClick={prevPage} />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext text="Siguiente" onClick={nextPage} />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </span>
+        </div>
+        <div className="order-5 w-full col-start-1 lg:col-end-4 flex justify-end w-full">
+          <span>
+            <p className="text-sm text-muted-foreground">
+              Mostrando <span className="font-bold text-foreground">{showedItems}</span> de{" "}
+              <span className="font-bold text-foreground">{total}</span> productos
+            </p>
+          </span>
+        </div>
+      </section>
+      <UsersTable
+        users={users}
+      />
     </div>
   )
 }

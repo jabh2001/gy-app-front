@@ -19,6 +19,9 @@ export type AuthLoginResponse = {
 export async function register(payload: AuthRegisterPayload): Promise<User> {
   return api.post('/auth/register', payload);
 }
+export async function profile(): Promise<User> {
+  return api.get('/auth/profile');
+}
 
 export async function login(payload: AuthLoginPayload): Promise<AuthLoginResponse> {
   return api.post('/auth/login', payload);
