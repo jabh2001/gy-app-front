@@ -1,31 +1,34 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import SettingsForm from "@/components/own/forms/settings-form"
-import { useSettings } from "@/hooks/api"
+import { useSettings, useUpdateSettings } from "@/hooks/api"
 import type { SiteSettings } from "@/api/models"
+import type { SettingsFormData } from "@/components/own/forms/settings-form"
 import useTitle from "@/hooks/use-title"
 
 export default function SettingsAdminIndex() {
   useTitle("Editar ajustes - Panel de administración")
   const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
-  const editing = Boolean(id)
-  const { data:settings } = useSettings()
+  const { data: settings } = useSettings()
+  const updateSettings = useUpdateSettings()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-
-  const handleSave = () => {
-    navigate(-1)
+  const handleSave = async (payload: SettingsFormData) => {
+    setErrorMessage(null)
+    try {
+      await updateSettings.mutateAsync(payload)
+      navigate(-1)
+    } catch (error) {
+      setErrorMessage('No se pudieron guardar los ajustes. Intenta de nuevo.')
+    }
   }
 
-  const handleEdit = () => {
-    navigate(-1)
-  }
-  if(!settings){
+  if (!settings) {
     return null
   }
 
 
   return (
-    
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-4">
         <div>
@@ -33,12 +36,13 @@ export default function SettingsAdminIndex() {
             Editar ajustes
           </h1>
           <p className="text-sm text-muted-foreground">
-            Completa los datos para {editing ? "actualizar" : "configurar"} los ajustes de la tienda.
+            Completa los datos para actualizar los ajustes de la tienda.
           </p>
         </div>
       </div>
 
-      <SettingsForm data={mapToFormData(settings)} onSave={handleSave} onEdit={handleEdit} submitLabel="Guardar ajustes" />
+      {errorMessage ? <p className="text-sm text-red-600 px-4">{errorMessage}</p> : null}
+      <SettingsForm data={mapToFormData(settings)} onSave={handleSave} onEdit={handleSave} submitLabel="Guardar ajustes" />
     </div>
   )
 }

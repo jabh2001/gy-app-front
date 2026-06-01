@@ -1,4 +1,3 @@
-import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Grip, Search, Upload, } from "lucide-react"
 
@@ -26,10 +25,6 @@ export default function ProductsAdminIndex() {
 
 
   const products = data?.items ?? []
-
-  useEffect(() => {
-    console.log("Productos cargados:", products)
-  }, [products])
 
   return (
     <div className="mx-auto flex w-full flex-col gap-6">

@@ -18,7 +18,7 @@ export function useUsers(params?: Record<string, unknown>, options?: any) {
     // Estos se pueden inyectar dinámicamente mediante el argumento `params`.
     const newParams = { sort: order, page: debouncedPage, ...params }
 
-    const query = usePaginatedQuery<User>(['users', newParams], BASE, newParams, options)
+    const query = usePaginatedQuery<User>(['users', newParams], BASE+'/', newParams, options)
     const pagination = usePagination({ page, setPage, items: query.data?.items, meta: query.data?.meta })
 
     return {
@@ -44,7 +44,7 @@ export function useUserDetail(id?: number | string, options?: any) {
 
 export function useCreateUser() {
     const qc = useQueryClient()
-    return useMutation((payload: Partial<User> & { password?: string }) => api.post(BASE, payload), {
+    return useMutation((payload: Partial<User> & { password?: string }) => api.post(BASE+'/', payload), {
         onSuccess: () => qc.invalidateQueries('users'),
     })
 }

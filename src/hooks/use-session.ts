@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { login as loginRequest, logout as logoutRequest, register as registerRequest, profile as profileRequest, type AuthLoginPayload, type AuthRegisterPayload } from '@/api/auth';
+import { login as loginRequest, logout as logoutRequest, register as registerRequest, profile as profileRequest, updateProfile as updateProfileRequest, type AuthLoginPayload, type AuthRegisterPayload } from '@/api/auth';
 import { normalizeApiError } from '@/api/index';
 import type { User } from '@/api/models';
 
@@ -17,6 +17,7 @@ export interface SessionState {
   login: (payload: AuthLoginPayload) => Promise<User>;
   register: (payload: AuthRegisterPayload) => Promise<User>;
   logout: () => Promise<void>;
+  updateProfile: (payload: Partial<Pick<User, 'email' | 'username'>> & { password?: string }) => Promise<User>;
   isAuthenticated: () => boolean;
   hasRole: (role: User['role']) => boolean;
   hasAnyRole: (roles: User['role'][]) => boolean;
@@ -59,9 +60,26 @@ export const useSession = create<SessionState>()(
       login: async (payload: AuthLoginPayload) => {
         set({ status: 'loading', error: undefined });
         try {
-          const response = await loginRequest(payload);
+          const sessionId = typeof window !== 'undefined' ? window.localStorage.getItem('cart_session_id') ?? undefined : undefined;
+          const response = await loginRequest(payload, sessionId);
           set({ user: response.user, status: 'authenticated' });
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('cart-refetch'));
+          }
           return response.user;
+        } catch (errorData) {
+          const apiError = normalizeApiError(errorData);
+          set({ error: apiError.message, status: 'error' });
+          throw apiError;
+        }
+      },
+
+      updateProfile: async (payload: Partial<Pick<User, 'email' | 'username'>> & { password?: string }) => {
+        set({ status: 'loading', error: undefined });
+        try {
+          const updatedUser = await updateProfileRequest(payload);
+          set({ user: updatedUser, status: 'authenticated' });
+          return updatedUser;
         } catch (errorData) {
           const apiError = normalizeApiError(errorData);
           set({ error: apiError.message, status: 'error' });
@@ -72,8 +90,12 @@ export const useSession = create<SessionState>()(
       register: async (payload: AuthRegisterPayload) => {
         set({ status: 'loading', error: undefined });
         try {
-          const newUser = await registerRequest(payload);
+          const sessionId = typeof window !== 'undefined' ? window.localStorage.getItem('cart_session_id') ?? undefined : undefined;
+          const newUser = await registerRequest(payload, sessionId);
           set({ user: newUser, status: 'authenticated' });
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('cart-refetch'));
+          }
           return newUser;
         } catch (errorData) {
           const apiError = normalizeApiError(errorData);
@@ -87,6 +109,9 @@ export const useSession = create<SessionState>()(
         try {
           await logoutRequest();
           set({ user: null, status: 'unauthenticated' });
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('cart-refetch'));
+          }
         } catch (errorData) {
           const apiError = normalizeApiError(errorData);
           set({ error: apiError.message, status: 'error' });

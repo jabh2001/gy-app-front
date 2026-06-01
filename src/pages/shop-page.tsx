@@ -13,7 +13,7 @@ const filterGroups = [
 ];
 export default function ShopPage() {
   const { categorySlug, search } = useParams<{ categorySlug: string, search: string, }>()
-  const { data, isLoading, params: { page, setPage }, pagination: { prevPage, nextPage, totalPages } } = useProducts({ sort: "featured_newest", q: search, category: categorySlug });
+  const { data, isLoading, params: { page, setPage }, pagination: { prevPage, nextPage, totalPages } } = useProducts({ sort: "featured_newest", q: search, category: categorySlug, active:"true" });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const pageNumbers = useMemo(() => generatePageNumbers(page, totalPages), [page, totalPages]);
@@ -101,7 +101,7 @@ export default function ShopPage() {
               {data?.items.map((product) => (
                 viewMode === 'grid' ? <ProductCard
                   key={product.id}
-                  to={`/shop/${product.id}`}
+                  to={`/shop/product/${product.id}`}
                   product={{
                     id: product.id,
                     name: product.name,

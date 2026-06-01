@@ -19,7 +19,7 @@ export default function CategoriesAdminDetail() {
       navigate(-1)
       return
     }
-
+    console.log({ category })
     try {
       await updateCategoryMutation.mutateAsync({ categoryId: Number(id), payload })
       navigate(-1)

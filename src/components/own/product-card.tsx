@@ -2,6 +2,7 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { useCart } from '@/hooks/api/useCart';
 
 type Props = {
   product: Product
@@ -16,13 +17,20 @@ interface Product {
 }
 
 export function ProductCard({ product, onClickAddToCart, to }: Props) {
-  const handleButtonClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    console.log("¡Botón clickeado! Ejecutando función sin salir de la página.")
-    onClickAddToCart?.(product)
-  }
+  const { addToCart, isLoading } = useCart();
+
+  const handleButtonClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (onClickAddToCart) {
+      onClickAddToCart(product);
+      return;
+    }
+
+    await addToCart(product.id, 1);
+  };
+
   return (
     <Link to={to ?? ""}>
       <Card className="group border-border bg-card text-card-foreground hover:shadow-lg transition-all duration-300 flex flex-col h-full rounded-[var(--radius)]">
@@ -52,9 +60,10 @@ export function ProductCard({ product, onClickAddToCart, to }: Props) {
             onClick={handleButtonClick}
             variant="default"
             className="w-full font-bold text-xs uppercase tracking-wider h-11 rounded-[calc(var(--radius)-4px)] shadow-sm flex items-center justify-center gap-2"
-            >
+            disabled={isLoading}
+          >
             <ShoppingCart size={18} strokeWidth={2.5} />
-            ADD TO CART
+            {isLoading ? 'Adding...' : 'ADD TO CART'}
           </Button>
         </CardFooter>
       </Card>

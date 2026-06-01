@@ -23,6 +23,8 @@ import UsersIndex from '@/pages/admin-pages/users/index'
 import UsersForm from '@/pages/admin-pages/users/form'
 import UsersDetail from '@/pages/admin-pages/users/detail'
 import SettingsIndex from '@/pages/admin-pages/settings/index'
+import OrderDetailPage from './pages/order-detail-page'
+import ProductDetailPage from '@/pages/product-detail-page'
 
 // Definimos la estructura de navegación
 const router = createBrowserRouter([
@@ -39,11 +41,13 @@ const router = createBrowserRouter([
           { index:true, element: <ShopPage /> },
           { path:"category/:categorySlug", element: <ShopPage /> },
           { path:"search/:search", element: <ShopPage /> },
+          { path:"product/:id", element: <ProductDetailPage /> },
         ]
       },
       { path: "/login", element: <LoginPage /> },
       { path: "/register", element: <RegisterPage /> },
       { path: "/cart", element: <CartPage /> },
+      { path: "/orders/:id", element: <OrderDetailPage /> },
       { path: "/profile", element: <ProfilePage /> },
     ],
   },

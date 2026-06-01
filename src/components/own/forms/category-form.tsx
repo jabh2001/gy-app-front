@@ -38,11 +38,12 @@ export default function CategoryForm({ data, onSave, onEdit, submitLabel = "Guar
   }
 
   const handleSubmit = () => {
+    const newData = {...formState, is_featured: formState.isFeatured, is_active: formState.isActive}
     if (data?.id) {
-      onEdit(formState)
+      onEdit(newData)
       return
     }
-    onSave(formState)
+    onSave(newData)
     setFormState({ name: "", slug: "", description: "", isFeatured: false , isActive: false })
   }
 

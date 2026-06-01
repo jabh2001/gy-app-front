@@ -17,7 +17,7 @@ export function useCategories(params?: Record<string, unknown>, options?: any) {
   const [featured, setFeatured] = useFeatured()
 
   const newParams = { sort: order, page: debouncedPage, active, featured, ...params }
-  const query =  usePaginatedQuery<Category>(['categories', newParams], BASE, newParams, options)
+  const query =  usePaginatedQuery<Category>(['categories', newParams], BASE+'/', newParams, options)
   const pagination = usePagination({ page, setPage, items:query.data?.items, meta:query.data?.meta })
 
   return {

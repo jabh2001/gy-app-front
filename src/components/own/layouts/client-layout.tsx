@@ -1,23 +1,13 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
 import { BottomBarMobile } from '@/components/own/layouts/ui/bottom-bar-mobile';
 import { PageHeader } from '@/components/own/layouts/ui/page-header';
 import { AdminFloatingButton } from '@/components/own/admin-floating-button';
 import Footer from '@/components/own/footer';
-
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useTitleStore } from '@/hooks/use-title';
 import { useEffect } from 'react';
 import { useSession } from '@/hooks/use-session';
+import CategoriesDropdown from './ui/categories-dropdown';
 
-const categories = ['Electrónica', 'Gaming', 'Accesorios', 'Ofertas'];
 
 export default function MainLayout() {
     const hasCheckedSession = useSession((state) => state.hasCheckedSession);
@@ -44,30 +34,7 @@ export default function MainLayout() {
             <PageHeader />
             <nav className="border-t border-white/10 bg-black/90">
                 <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-6 px-4 py-3 text-slate-200">
-                    <div className="relative hidden sm:inline-flex">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <button
-                                    type="button"
-                                    className="inline-flex items-center gap-2 rounded-sm border border-white/15 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-primary hover:text-white"
-                                >
-                                    Categorías
-                                    <ChevronDown size={16} />
-                                </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-40" align="start">
-                                <DropdownMenuGroup>
-                                    <DropdownMenuLabel>Más destacadas</DropdownMenuLabel>
-                                    {categories.map((category) => (
-                                        <DropdownMenuItem key={category} className="cursor-pointer">
-                                            {category}
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-
+                    <CategoriesDropdown />
                     <div className="flex flex-wrap items-center justify-center gap-6">
                         <HeaderLink to="/">Inicio</HeaderLink>
                         <HeaderLink to="/shop">Tienda</HeaderLink>

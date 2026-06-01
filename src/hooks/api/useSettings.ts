@@ -3,7 +3,7 @@ import api from '@/api'
 import type { SettingsFormData } from '@/components/own/forms/settings-form'
 import { getSettings } from '@/api/settings'
 
-const BASE = '/settings'
+const BASE = '/settings/'
 
 export function useSettings() {
   return useQuery(['settings'], getSettings)

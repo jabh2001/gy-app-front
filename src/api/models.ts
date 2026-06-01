@@ -35,9 +35,23 @@ export interface Tag {
   slug: string;
 }
 
+export interface Attribute {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+}
+
+export interface ProductAttributeValue {
+  id: number;
+  attribute: Attribute | null;
+  value: string;
+}
+
 export interface ProductImage {
   id: number;
   url: string;
+  url_path: string;
   alt_text?: string | null;
   is_main: boolean;
   order: number;
@@ -60,7 +74,8 @@ export interface Product {
   rating: number;
   main_image?: string | null;
   main_image_url_path?: string | null;
-  attributes: Record<string, unknown>;
+  attributes: Attribute[];
+  attribute_values: ProductAttributeValue[];
   categories: Category[];
   tags: Tag[];
   images: ProductImage[];
@@ -69,18 +84,21 @@ export interface Product {
 
 export interface CartItem {
   id: number;
+  product_id?: number; // Opcional, ya que to_dict del backend no lo retorna explícitamente
   product: Product | null;
   quantity: number;
   price: number;
 }
 
-export interface Cart {
+export interface CartData {
   id: number;
   user_id?: number | null;
   session_id?: string | null;
   items: CartItem[];
   total: number;
 }
+
+export type Cart = CartData;
 
 export interface OrderItem {
   id: number;
@@ -89,13 +107,46 @@ export interface OrderItem {
   price: number;
 }
 
+export interface BillingData {
+  id: number;
+  user_id: number;
+  full_name: string;
+  address_line1?: string | null;
+  rif: string;
+  phone?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+// Representa la instantánea exacta guardada en formato JSON dentro de la orden
+export type BillingDataSnapshot = {
+  full_name: string;
+  address_line1?: string | null;
+  rif: string;
+  phone?: string | null;
+}
+
+export type OrderStatus = 'pending' | 'invoiced' | 'completed' | 'cancelled' | string;
+
 export interface Order {
   id: number;
+  user_id?: number | null;
+  billing_data_id?: number | null;
+  payment_method?: string | null;
+  billing_data_snapshot?: BillingDataSnapshot | null;
   customer_name?: string | null;
   customer_phone?: string | null;
-  status: string;
+  status: OrderStatus;
   items: OrderItem[];
   total: number;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface CheckoutResponse {
+  order_id: number;
+  order_url: string;
+  whatsapp_url: string;
 }
 
 export interface SiteSettings {

@@ -6,7 +6,6 @@ import { getProduct } from '@/api/products'
 import { useDebounce } from '@/hooks/use-debounce'
 import { usePagination } from '@/hooks/use-pagination'
 import { usePage, useActive, useFeatured, useOnSale, useOrder } from '@/hooks/api/use-query-params'
-import { useEffect } from 'react'
 
 const BASE = '/products'
 
@@ -22,9 +21,6 @@ export function useProducts(params?: Record<string, unknown>, options?: any) {
   const [onSale, setOnSale] = useOnSale()
 
   const newParams = { sort: order, page: debouncedPage, active, featured, on_sale:onSale, ...params }
-  useEffect(() => {
-    console.log({ order, params, newParams })
-  }, [])
   const query = usePaginatedQuery<Product>(['products', newParams], BASE, newParams, options)
   const pagination = usePagination({ page, setPage, items:query.data?.items, meta:query.data?.meta })
   
@@ -46,7 +42,7 @@ export function useProductDetail(id?: number | string, options?: any) {
 
 export function useCreateProduct() {
   const qc = useQueryClient()
-  return useMutation((payload: FormData | Partial<Product>) => api.post(BASE, payload), {
+  return useMutation((payload: FormData | Partial<Product>) => api.post(BASE+'/', payload), {
     onSuccess: () => qc.invalidateQueries('products'),
   })
 }

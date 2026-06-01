@@ -5,11 +5,13 @@ import { CartDrawer } from '@/components/own/cart-drawer';
 import { AccountDrawer } from '@/components/own/account-drawer';
 import { useSession } from '@/hooks/use-session';
 import GlobalSearch from '@/components/own/GlobalSearch';
+import { useCart } from '@/hooks/api/useCart';
 
 function PageHeader() {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isAccountOpen, setIsAccountOpen] = useState(false);
     const user = useSession(session => session.user);
+    const { cart } = useCart();
 
     return (
             <header className="bg-black/95 text-white shadow-sm">
@@ -48,11 +50,11 @@ function PageHeader() {
                                 >
                                     <div className="relative rounded-xl border border-white/15 bg-black/15 p-2">
                                         <ShoppingCart size={18} />
-                                        <span className="absolute -top-2 -right-2 rounded-full bg-primary px-1.5 text-[10px] font-bold text-black">0</span>
+                                        <span className="absolute -top-2 -right-2 rounded-full bg-primary px-1.5 text-[10px] font-bold text-black">{cart?.items.length ?? 0}</span>
                                     </div>
                                     <div className="text-left text-xs">
                                         <p className="text-slate-300">Carrito</p>
-                                        <p className="font-semibold text-white">€ 0.00</p>
+                                        <p className="font-semibold text-white">€ {(cart?.total ?? 0).toFixed(2)}</p>
                                     </div>
                                 </button>
 

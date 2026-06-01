@@ -29,7 +29,7 @@ export function useSearchSuggestions(q: string, options?: any) {
   return useQuery<SuggestionResponse>(
     ['search-suggestions', debouncedSearch],
     async () => {
-      const response = await api.get('/search/suggestions', {
+      const response = await api.get('/search/suggestions/', {
         params: { q: debouncedSearch }
       })
       console.log({ response })
@@ -51,7 +51,7 @@ export function useSearchProducts(q: string, page: number = 1, options?: any) {
   return useQuery<FullSearchResponse>(
     ['search-products', q, page],
     async () => {
-      const response = await api.get('/search/products', {
+      const response = await api.get('/search/products/', {
         params: { q, page }
       })
       return response.data
