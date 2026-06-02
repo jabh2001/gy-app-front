@@ -152,7 +152,7 @@ export default function CartPage() {
                   )}
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="hidden gap-4 sm:grid-cols-2">
                   <label className="grid gap-2 text-sm font-medium">
                     Método de pago
                     <select

@@ -11,7 +11,7 @@ export function useSettings() {
 
 export function useUpdateSettings() {
   const qc = useQueryClient()
-  return useMutation((payload: Partial<SettingsFormData>) => api.post(BASE, payload), {
+  return useMutation((payload: FormData | Partial<SettingsFormData>) => api.post(BASE + '/', payload), {
     onSuccess: () => qc.invalidateQueries('settings'),
   })
 }

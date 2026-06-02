@@ -15,19 +15,19 @@ export function useProducts(params?: Record<string, unknown>, options?: any) {
   const [page, setPage] = usePage()
   const debouncedPage = useDebounce(page, 500)
   const [order, setOrder] = useOrder()
-  
-  const [active, setActive ] = useActive()
+
+  const [active, setActive] = useActive()
   const [featured, setFeatured] = useFeatured()
   const [onSale, setOnSale] = useOnSale()
 
-  const newParams = { sort: order, page: debouncedPage, active, featured, on_sale:onSale, ...params }
-  const query = usePaginatedQuery<Product>(['products', newParams], BASE, newParams, options)
-  const pagination = usePagination({ page, setPage, items:query.data?.items, meta:query.data?.meta })
-  
+  const newParams = { sort: order, page: debouncedPage, active, featured, on_sale: onSale, ...params }
+  const query = usePaginatedQuery<Product>(['products', newParams], BASE + '/', newParams, options)
+  const pagination = usePagination({ page, setPage, items: query.data?.items, meta: query.data?.meta })
+
   return {
     ...query,
-    params: { 
-      active, setActive, featured, setFeatured, onSale, setOnSale, order, setOrder, page, setPage 
+    params: {
+      active, setActive, featured, setFeatured, onSale, setOnSale, order, setOrder, page, setPage
     },
     pagination
   }
@@ -42,7 +42,7 @@ export function useProductDetail(id?: number | string, options?: any) {
 
 export function useCreateProduct() {
   const qc = useQueryClient()
-  return useMutation((payload: FormData | Partial<Product>) => api.post(BASE+'/', payload), {
+  return useMutation((payload: FormData | Partial<Product>) => api.post(BASE + '/', payload), {
     onSuccess: () => qc.invalidateQueries('products'),
   })
 }
