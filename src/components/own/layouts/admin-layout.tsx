@@ -1,8 +1,9 @@
-import { useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom"
 import { LayoutDashboard, Package, Tags, ShoppingBag, Users, Settings, Store, PanelLeft, EthernetPort } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarRail, SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 import { useTitleStore } from "@/hooks/use-title"
@@ -47,6 +48,19 @@ const navItems = [
     icon: Settings,
   },
 ]
+
+function AdminPageSkeleton() {
+  return (
+    <div className="space-y-6 p-6">
+      <Skeleton className="h-8 w-48" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(6)].map((_, i) => (
+          <Skeleton key={i} className="h-32 w-full rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminLayout() {
   const checkSession = useSession((state) => state.checkSession);
@@ -95,7 +109,9 @@ export default function AdminLayout() {
 
         <main className="min-h-[calc(100vh-4rem)] bg-muted/30">
           <div className="mx-auto w-full">
-            <Outlet />
+            <Suspense fallback={<AdminPageSkeleton />}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </SidebarInset>

@@ -1,8 +1,17 @@
+import { useState } from "react";
+import { toast } from "sonner";
 import { CrossIcon, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.info("Función de newsletter próximamente disponible.");
+    setEmail("");
+  };
 
   return (
     <footer className="bg-muted text-muted-foreground pt-12 pb-6 px-4 md:px-12 transition-colors duration-300">
@@ -45,15 +54,17 @@ export default function Footer() {
           <div className="space-y-6">
             <h4 className="text-foreground font-bold uppercase tracking-tight">Suscríbete</h4>
             <p className="text-sm">Regístrese para recibir ofertas exclusivas, historias originales, eventos y más.</p>
-            <div className="relative group max-w-xs">
+            <form onSubmit={handleSubscribe} className="relative group max-w-xs">
               <Input 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Su correo electrónico" 
                 className="bg-background border-border rounded-full pr-12 focus-visible:ring-primary h-12"
               />
-              <button className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground group-hover:translate-x-1 transition-transform">
+              <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground group-hover:translate-x-1 transition-transform">
                 <ArrowRight size={20} />
               </button>
-            </div>
+            </form>
           </div>
         </div>
 

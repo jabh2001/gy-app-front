@@ -1,4 +1,5 @@
 import axios, { type AxiosError, type AxiosResponse } from 'axios';
+import { toast } from 'sonner';
 
 export const baseURL = 'http://127.0.0.1:5000/api';
 // export const baseURL = '/api';
@@ -97,6 +98,10 @@ api.interceptors.response.use(
     return response.data;
   },
   (error: AxiosError<unknown>) => {
+    if (error.response?.status === 401) {
+      toast.error('Tu sesión ha expirado. Inicia sesión de nuevo.');
+    }
+
     if (error.response?.data && isErrorResponse(error.response.data)) {
       return Promise.reject({
         type: 'backend',

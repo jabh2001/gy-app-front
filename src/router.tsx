@@ -1,32 +1,36 @@
+import { lazy } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import ClientLayout from '@/components/own/layouts/client-layout'
-import HomePage from '@/pages/home-page'
 import AdminLayout from '@/components/own/layouts/admin-layout'
+import HomePage from '@/pages/home-page'
 import AboutPage from './pages/about-page'
-import ShopPage from './pages/shop-page'
 import LoginPage from '@/pages/login-page'
 import RegisterPage from '@/pages/register-page'
-import CartPage from '@/pages/cart-page'
-import ProfilePage from '@/pages/profile-page'
 import LogoutPage from '@/pages/logout-page'
-import AdminHomePage from '@/pages/admin-pages/admin-home-page'
-import ProductsIndex from '@/pages/admin-pages/products/index'
-import ProductsForm from '@/pages/admin-pages/products/form'
-import ProductsDetail from '@/pages/admin-pages/products/detail'
-import CategoriesIndex from '@/pages/admin-pages/categories/index'
-import CategoriesForm from '@/pages/admin-pages/categories/form'
-import CategoriesDetail from '@/pages/admin-pages/categories/detail'
-import OrdersIndex from '@/pages/admin-pages/orders/index'
-import OrdersForm from '@/pages/admin-pages/orders/form'
-import OrdersDetail from '@/pages/admin-pages/orders/detail'
-import UsersIndex from '@/pages/admin-pages/users/index'
-import UsersForm from '@/pages/admin-pages/users/form'
-import UsersDetail from '@/pages/admin-pages/users/detail'
-import SettingsIndex from '@/pages/admin-pages/settings/index'
-import OrderDetailPage from './pages/order-detail-page'
-import ProductDetailPage from '@/pages/product-detail-page'
 
-// Definimos la estructura de navegación
+const ShopPage = lazy(() => import('@/pages/shop-page'))
+const ProductDetailPage = lazy(() => import('@/pages/product-detail-page'))
+const CartPage = lazy(() => import('@/pages/cart-page'))
+const OrderDetailPage = lazy(() => import('@/pages/order-detail-page'))
+const ProfilePage = lazy(() => import('@/pages/profile-page'))
+const OrdersPage = lazy(() => import('@/pages/orders-page'))
+const ContactPage = lazy(() => import('@/pages/contact-page'))
+
+const AdminHomePage = lazy(() => import('@/pages/admin-pages/admin-home-page'))
+const ProductsIndex = lazy(() => import('@/pages/admin-pages/products/index'))
+const ProductsForm = lazy(() => import('@/pages/admin-pages/products/form'))
+const ProductsDetail = lazy(() => import('@/pages/admin-pages/products/detail'))
+const CategoriesIndex = lazy(() => import('@/pages/admin-pages/categories/index'))
+const CategoriesForm = lazy(() => import('@/pages/admin-pages/categories/form'))
+const CategoriesDetail = lazy(() => import('@/pages/admin-pages/categories/detail'))
+const OrdersIndex = lazy(() => import('@/pages/admin-pages/orders/index'))
+const OrdersForm = lazy(() => import('@/pages/admin-pages/orders/form'))
+const OrdersDetail = lazy(() => import('@/pages/admin-pages/orders/detail'))
+const UsersIndex = lazy(() => import('@/pages/admin-pages/users/index'))
+const UsersForm = lazy(() => import('@/pages/admin-pages/users/form'))
+const UsersDetail = lazy(() => import('@/pages/admin-pages/users/detail'))
+const SettingsIndex = lazy(() => import('@/pages/admin-pages/settings/index'))
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -34,8 +38,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "/about", element: <AboutPage /> },
-      { path: "/contact", element: <AboutPage /> },
-      { 
+      { path: "/contact", element: <ContactPage /> },
+      {
         path: "/shop",
         children:[
           { index:true, element: <ShopPage /> },
@@ -47,6 +51,7 @@ const router = createBrowserRouter([
       { path: "/login", element: <LoginPage /> },
       { path: "/register", element: <RegisterPage /> },
       { path: "/cart", element: <CartPage /> },
+      { path: "/orders", element: <OrdersPage /> },
       { path: "/orders/:id", element: <OrderDetailPage /> },
       { path: "/profile", element: <ProfilePage /> },
     ],

@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import useTitle from '@/hooks/use-title'
 import { useSession } from '@/hooks/use-session'
-import { normalizeApiError } from '@/api/index'
 import { useBillingData, useCreateBillingData, useUpdateBillingData, useDeleteBillingData } from '@/hooks/api'
-import { useOrders } from '@/hooks/api/useOrders'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -30,13 +29,9 @@ export default function ProfilePage() {
   const updateBilling = useUpdateBillingData()
   const deleteBilling = useDeleteBillingData()
 
-  const ordersQuery = useOrders()
-
   const [profileForm, setProfileForm] = useState({ username: '', email: '', password: '' })
   const [billingForm, setBillingForm] = useState(initialBillingForm)
   const [selectedBillingId, setSelectedBillingId] = useState<number | null>(null)
-  const [statusMessage, setStatusMessage] = useState<string | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) {
@@ -72,8 +67,6 @@ export default function ProfilePage() {
 
   const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setErrorMessage(null)
-    setStatusMessage(null)
 
     try {
       const payload: Partial<{ username: string; email: string; password: string }> = {
@@ -87,17 +80,14 @@ export default function ProfilePage() {
 
       await updateProfile(payload)
       setProfileForm((prev) => ({ ...prev, password: '' }))
-      setStatusMessage('Perfil actualizado correctamente.')
+      toast.success('Perfil actualizado correctamente.')
     } catch (errorData) {
-      const apiError = normalizeApiError(errorData)
-      setErrorMessage(apiError.message || 'No se pudo actualizar el perfil.')
+      toast.error('No se pudo actualizar el perfil.')
     }
   }
 
   const handleBillingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setErrorMessage(null)
-    setStatusMessage(null)
 
     const payload = {
       full_name: billingForm.full_name,
@@ -109,32 +99,28 @@ export default function ProfilePage() {
     try {
       if (selectedBillingId) {
         await updateBilling.mutateAsync({ billingId: selectedBillingId, payload })
-        setStatusMessage('Datos de facturación actualizados.')
+        toast.success('Datos de facturación actualizados.')
       } else {
         await createBilling.mutateAsync(payload)
-        setStatusMessage('Perfil de facturación creado.')
+        toast.success('Perfil de facturación creado.')
       }
       setSelectedBillingId(null)
       setBillingForm(initialBillingForm)
     } catch (errorData) {
-      const apiError = normalizeApiError(errorData)
-      setErrorMessage(apiError.message || 'No se pudo guardar el perfil de facturación.')
+      toast.error('No se pudo guardar el perfil de facturación.')
     }
   }
 
   const handleBillingDelete = async (billingId: number) => {
-    setErrorMessage(null)
-    setStatusMessage(null)
     try {
       await deleteBilling.mutateAsync(billingId)
       if (selectedBillingId === billingId) {
         setSelectedBillingId(null)
         setBillingForm(initialBillingForm)
       }
-      setStatusMessage('Perfil de facturación eliminado.')
+      toast.success('Perfil de facturación eliminado.')
     } catch (errorData) {
-      const apiError = normalizeApiError(errorData)
-      setErrorMessage(apiError.message || 'No se pudo eliminar el perfil de facturación.')
+      toast.error('No se pudo eliminar el perfil de facturación.')
     }
   }
 
@@ -146,15 +132,6 @@ export default function ProfilePage() {
         </section>
       </main>
     )
-  }
-
-  const statusColor = (status?: string) => {
-    const s = (status || '').toLowerCase()
-    if (s === 'pending') return 'bg-amber-100 text-amber-800'
-    if (s === 'invoiced') return 'bg-sky-100 text-sky-800'
-    if (s === 'completed') return 'bg-emerald-100 text-emerald-800'
-    if (s === 'cancelled' || s === 'cancelado') return 'bg-red-100 text-red-800'
-    return 'bg-gray-100 text-gray-800'
   }
 
   return (
@@ -224,9 +201,6 @@ export default function ProfilePage() {
                       />
                     </label>
 
-                    {statusMessage && <p className="text-sm text-emerald-600">{statusMessage}</p>}
-                    {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
-
                     <div className="flex flex-wrap gap-3">
                       <Button type="submit">Guardar cambios</Button>
                       <Button variant="outline" type="button" onClick={() => navigate('/')}>Volver a inicio</Button>
@@ -277,9 +251,6 @@ export default function ProfilePage() {
                         onChange={(event) => setBillingForm((prev) => ({ ...prev, rif: event.target.value }))}
                       />
                     </label>
-
-                    {statusMessage && <p className="text-sm text-emerald-600">{statusMessage}</p>}
-                    {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
 
                     <div className="flex flex-wrap gap-3">
                       <Button type="submit" disabled={createBilling.isLoading || updateBilling.isLoading}>
@@ -345,42 +316,12 @@ export default function ProfilePage() {
                 <CardDescription>Revisa todos los pedidos que has realizado en la tienda.</CardDescription>
               </CardHeader>
               <CardContent>
-                {ordersQuery.isLoading ? (
-                  <p className="text-sm text-slate-500">Cargando pedidos...</p>
-                ) : ordersQuery.data?.items?.length ? (
-                  <div className="space-y-4">
-                    {ordersQuery.data.items.map(order => (
-                      <div key={order.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-slate-200 bg-white">
-                        <div>
-                          <div className="flex items-center gap-3">
-                            <h3 className="font-medium">Pedido #{order.id}</h3>
-                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor(order.status)} capitalize`}>
-                              {order.status}
-                            </span>
-                          </div>
-                          <p className="text-sm text-slate-500 mt-1">
-                            {order.created_at ? new Date(order.created_at).toLocaleDateString() : 'Fecha no disponible'} • ${order.total?.toFixed(2)}
-                          </p>
-                          <p className="text-sm text-slate-600 mt-1">
-                            {order.items?.length || 0} artículos
-                          </p>
-                        </div>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/order/${order.id}`}>Ver detalle</Link>
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-                    <svg className="size-10 text-slate-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                    </svg>
-                    <p className="text-slate-600 font-medium">No has realizado ningún pedido</p>
-                    <p className="text-sm text-slate-500 mt-1">Tus compras aparecerán aquí.</p>
-                    <Button variant="link" className="mt-2" onClick={() => navigate('/shop')}>Ir a la tienda</Button>
-                  </div>
-                )}
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <p className="text-sm text-slate-600 mb-4">Accede a la vista completa de tus pedidos.</p>
+                  <Button onClick={() => navigate('/orders')}>
+                    Ver todos mis pedidos
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

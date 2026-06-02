@@ -1,25 +1,25 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useSession } from '@/hooks/use-session';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, status, error } = useSession();
+  const { login, status } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMessage('');
 
     try {
       await login({ email, password });
+      toast.success('Sesión iniciada correctamente.');
       navigate('/');
     } catch (err) {
-      setMessage('No se pudo iniciar sesión. Revisa tus datos e intenta de nuevo.');
+      toast.error('No se pudo iniciar sesión. Revisa tus datos e intenta de nuevo.');
     }
   };
 
@@ -66,10 +66,6 @@ export default function LoginPage() {
                   required
                 />
               </div>
-
-              {message || error ? (
-                <p className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">{message || error}</p>
-              ) : null}
 
               <Button type="submit" className="w-full rounded-3xl bg-black px-5 py-3 text-sm font-bold text-white hover:bg-slate-800" disabled={status === 'loading'}>
                 {status === 'loading' ? 'Ingresando...' : 'Iniciar sesión'}

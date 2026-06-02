@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import ProductForm, { type ProductFormData } from "@/components/own/forms/product-form"
 import { useCreateProduct, useProductDetail, useUpdateProduct } from "@/hooks/api/useProducts"
@@ -44,9 +45,10 @@ export default function ProductsAdminForm() {
   const handleSave = async (payload: FormData) => {
     try {
       await createProductMutation.mutateAsync(payload)
+      toast.success('Producto creado correctamente.')
       navigate(-1)
     } catch (error) {
-      console.error(error)
+      toast.error('No se pudo crear el producto.')
     }
   }
 
@@ -58,9 +60,10 @@ export default function ProductsAdminForm() {
 
     try {
       await updateProductMutation.mutateAsync({ productId: Number(id), payload })
+      toast.success('Producto actualizado correctamente.')
       navigate(-1)
     } catch (error) {
-      console.error(error)
+      toast.error('No se pudo actualizar el producto.')
     }
   }
 

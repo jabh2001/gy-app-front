@@ -1,32 +1,32 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useSession } from '@/hooks/use-session';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { register, status, error } = useSession();
+  const { register, status } = useSession();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState('');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMessage('');
 
     if (password !== confirmPassword) {
-      setMessage('Las contraseñas no coinciden.');
+      toast.error('Las contraseñas no coinciden.');
       return;
     }
 
     try {
       await register({ email, username, password });
+      toast.success('Cuenta creada correctamente.');
       navigate('/');
     } catch (err) {
-      setMessage('No se pudo crear la cuenta. Revisa los datos e intenta de nuevo.');
+      toast.error('No se pudo crear la cuenta. Revisa los datos e intenta de nuevo.');
     }
   };
 
@@ -96,10 +96,6 @@ export default function RegisterPage() {
                   required
                 />
               </div>
-
-              {message || error ? (
-                <p className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">{message || error}</p>
-              ) : null}
 
               <Button type="submit" className="w-full rounded-3xl bg-black px-5 py-3 text-sm font-bold text-white hover:bg-slate-800" disabled={status === 'loading'}>
                 {status === 'loading' ? 'Registrando...' : 'Crear cuenta'}

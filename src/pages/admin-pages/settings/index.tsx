@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
 import SettingsForm from "@/components/own/forms/settings-form"
 import { useSettings, useUpdateSettings } from "@/hooks/api"
@@ -11,18 +11,13 @@ export default function SettingsAdminIndex() {
   const navigate = useNavigate()
   const { data: settings, isLoading } = useSettings()
   const updateSettings = useUpdateSettings()
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const handleSave = async (payload: FormData) => {
-    setErrorMessage(null)
-    setSuccessMessage(null)
     try {
       await updateSettings.mutateAsync(payload)
-      setSuccessMessage('Ajustes guardados correctamente.')
-      setTimeout(() => setSuccessMessage(null), 4000)
+      toast.success('Ajustes guardados correctamente.')
     } catch (error) {
-      setErrorMessage('No se pudieron guardar los ajustes. Intenta de nuevo.')
+      toast.error('No se pudieron guardar los ajustes. Intenta de nuevo.')
     }
   }
 
@@ -59,24 +54,6 @@ export default function SettingsAdminIndex() {
           </p>
         </div>
       </div>
-
-      {/* Mensajes de estado */}
-      {successMessage && (
-        <div className="mx-4 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 animate-in fade-in slide-in-from-top-2 duration-300">
-          <svg className="size-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-          </svg>
-          {successMessage}
-        </div>
-      )}
-      {errorMessage && (
-        <div className="mx-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 animate-in fade-in slide-in-from-top-2 duration-300">
-          <svg className="size-5 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-          </svg>
-          {errorMessage}
-        </div>
-      )}
 
       <SettingsForm
         data={mapToFormData(settings)}

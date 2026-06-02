@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import { 
   ChevronRight, 
   Minus, 
@@ -12,8 +13,7 @@ import {
   ShieldCheck,
   ChevronLeft
 } from 'lucide-react';
-import { useProductDetail } from '@/hooks/api'; //
-// Asumimos que useCart exporta { addToCart, isAdding } según el backlog previo
+import { useProductDetail } from '@/hooks/api';
 import { useCart } from '@/hooks/api/useCart'; 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,7 +27,7 @@ export default function ProductDetailPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
-//   if (isLoading) return <ProductDetailSkeleton />;
+  if (isLoading) return <ProductDetailSkeleton />;
   if (error || !product) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-4">
@@ -150,7 +150,10 @@ export default function ProductDetailPage() {
 
             {/* Botón Principal Add to Cart */}
             <Button 
-              onClick={() => addToCart(product.id, quantity)}
+              onClick={async () => {
+                await addToCart(product.id, quantity);
+                toast.success(`${product.name} agregado al carrito`);
+              }}
               className="flex-1 h-12 bg-[#F2E300] hover:bg-[#D4C700] text-black font-extrabold text-sm rounded-lg shadow-sm transition-all tracking-wide"
             >
               Add to Cart
@@ -242,4 +245,24 @@ export default function ProductDetailPage() {
   );
 }
 
-// COMPONENTE AUXILIAR:
+function ProductDetailSkeleton() {
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <Skeleton className="h-5 w-64" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="lg:col-span-7">
+          <Skeleton className="w-full aspect-square rounded-2xl" />
+        </div>
+        <div className="lg:col-span-5 space-y-6">
+          <Skeleton className="h-10 w-3/4" />
+          <Skeleton className="h-8 w-1/3" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-6 w-1/2" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+        </div>
+      </div>
+    </div>
+  );
+}

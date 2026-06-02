@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { QRCodeSVG } from 'qrcode.react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -85,9 +86,6 @@ export default function OrderDetailPage() {
   const isAdmin = useSession((state) => state.hasRole('admin'))
   const cancelOrder = useCancelOrder()
   const { data: settings } = useSettings()
-  const [statusMessage, setStatusMessage] = useState<string | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-
   const order = orderQuery.data
   const canCancel = !!order && (order.status?.toLowerCase() !== 'cancelled' && order.status?.toLowerCase() !== 'cancelado')
 
@@ -154,15 +152,12 @@ export default function OrderDetailPage() {
                 </Button>
                 <Button variant="destructive" onClick={async () => {
                   if (!orderId) return
-                  setStatusMessage(null)
-                  setErrorMessage(null)
                   try {
                     await cancelOrder.mutateAsync(orderId)
-                    setStatusMessage('Pedido cancelado correctamente.')
-                    // refetch
+                    toast.success('Pedido cancelado correctamente.')
                     orderQuery.refetch()
                   } catch (err) {
-                    setErrorMessage('No se pudo cancelar el pedido.')
+                    toast.error('No se pudo cancelar el pedido.')
                   }
                 }} disabled={!canCancel || cancelOrder.isLoading}>
                   {cancelOrder.isLoading ? 'Cancelando...' : 'Cancelar pedido'}
@@ -278,12 +273,7 @@ export default function OrderDetailPage() {
                 </div>
               </div>
 
-              {(statusMessage || errorMessage) && (
-                <div>
-                  {statusMessage && <p className="text-sm text-emerald-600">{statusMessage}</p>}
-                  {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
-                </div>
-              )}
+
             </CardContent>
           </Card>
         )}

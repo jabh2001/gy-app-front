@@ -4,6 +4,7 @@ import {
   ShoppingCart,
   User,
   UserPlus,
+  Package,
   X,
 } from "lucide-react";
 import {
@@ -96,6 +97,7 @@ export function AccountDrawer({
           </div>}
           { hasCheckedSession && user && <div className="overflow-hidden rounded-[4px] border border-[#dfe3e8] bg-white">
             <MenuItem icon={<User />} label="Perfil" to={profilePath} />
+            <MenuItem icon={<Package />} label="Mis pedidos" to="/orders" />
             <MenuItem icon={<LogOut />} label="Cerrar sesión" to={logoutPath} />
           </div>}
         </div>

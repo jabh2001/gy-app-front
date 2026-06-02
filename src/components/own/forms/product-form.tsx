@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react"
 import { ImagePlus, X } from "lucide-react"
+import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -8,6 +9,7 @@ import {
 } from "@/components/ui/file-upload"
 import AdminForm from "./admin-form"
 import { NativeImageCheckbox } from "@/components/uitripled/native-image-checkbox-shadcnui"
+import { compressImage } from "@/lib/compress-image"
 
 export interface ProductFormData {
   id?: number
@@ -72,12 +74,15 @@ export default function ProductForm({ data, onSave, onEdit, submitLabel = "Guard
     [],
   )
 
-  const handleImagesChange = useCallback((images: File[]) => {
-    console.log("Selected images:", images)
+  const handleImagesChange = useCallback(async (images: File[]) => {
+    const compressed = await Promise.all(
+      images.map((file) => compressImage(file))
+    );
+    toast.success(`${compressed.length} imagen(es) comprimida(s)`);
     setFormState((prev) => ({
       ...prev,
-      images,
-      mainImageIndex: Math.min(prev.mainImageIndex, Math.max(images.length - 1, 0)),
+      images: compressed,
+      mainImageIndex: Math.min(prev.mainImageIndex, Math.max(compressed.length - 1, 0)),
     }))
   }, [])
 

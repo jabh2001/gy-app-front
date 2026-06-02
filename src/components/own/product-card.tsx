@@ -1,4 +1,5 @@
 import { ShoppingCart } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -29,6 +30,7 @@ export function ProductCard({ product, onClickAddToCart, to }: Props) {
     }
 
     await addToCart(product.id, 1);
+    toast.success(`${product.name} agregado al carrito`);
   };
 
   return (

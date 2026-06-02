@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { useCart } from '@/hooks/api/useCart'
 import { useBillingData, useCheckout } from '@/hooks/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CartPage() {
   const navigate = useNavigate()
@@ -16,23 +18,19 @@ export default function CartPage() {
   const billingData = useMemo(() => billingQuery.data ?? [], [billingQuery.data])
   const [selectedBillingId, setSelectedBillingId] = useState<number | null>(null)
   const [paymentMethod, setPaymentMethod] = useState('credit_card')
-  const [statusMessage, setStatusMessage] = useState<string | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const total = useMemo(() => cart?.items.reduce((acc, item) => acc + item.price * item.quantity, 0) ?? 0, [cart])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setStatusMessage(null)
-    setErrorMessage(null)
 
     if (!selectedBillingId) {
-      setErrorMessage('Selecciona un perfil de facturación para continuar.')
+      toast.error('Selecciona un perfil de facturación para continuar.')
       return
     }
 
     if (!cart || !cart.items.length) {
-      setErrorMessage('El carrito está vacío.')
+      toast.error('El carrito está vacío.')
       return
     }
 
@@ -42,8 +40,7 @@ export default function CartPage() {
         billing_data_id: selectedBillingId,
         payment_method: paymentMethod,
       })
-      setStatusMessage('Compra realizada correctamente. Redirigiendo a WhatsApp...')
-      setErrorMessage(null)
+      toast.success('Compra realizada correctamente.')
 
       if (result?.whatsapp_url) {
         window.location.href = result.whatsapp_url
@@ -57,8 +54,25 @@ export default function CartPage() {
 
       navigate('/profile')
     } catch (errorData) {
-      setErrorMessage('No fue posible finalizar la compra. Intenta de nuevo.')
+      toast.error('No fue posible finalizar la compra. Intenta de nuevo.')
     }
+  }
+
+  if (cartLoading) {
+    return (
+      <main className="min-h-screen bg-gray-50 px-4 py-8">
+        <div className="mx-auto max-w-7xl space-y-6">
+          <Skeleton className="h-10 w-48" />
+          <div className="grid gap-8 xl:grid-cols-[1.4fr_0.9fr]">
+            <div className="space-y-6">
+              <Skeleton className="h-40 w-full rounded-3xl" />
+              <Skeleton className="h-64 w-full rounded-3xl" />
+            </div>
+            <Skeleton className="h-48 w-full rounded-3xl" />
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -171,9 +185,6 @@ export default function CartPage() {
                     <Input placeholder="Notas para el vendedor (opcional)" disabled />
                   </label>
                 </div>
-
-                {statusMessage && <p className="text-sm text-emerald-600">{statusMessage}</p>}
-                {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
 
                 <Button type="submit" disabled={checkout.isLoading || cartLoading || !cart?.items.length}>
                   {checkout.isLoading ? 'Procesando...' : 'Finalizar compra'}
