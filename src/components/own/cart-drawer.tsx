@@ -1,4 +1,4 @@
-import { X, Minus, Plus, ArrowRight, Truck } from "lucide-react";
+import { X, Minus, Plus, ArrowRight } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import {
@@ -17,11 +17,7 @@ interface CartDrawerProps {
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { cart, updateQuantity, removeItem, clearCart, isLoading } = useCart();
   const subtotal = cart?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) ?? 0;
-  const taxes = subtotal * 0.18;
-  const total = subtotal + taxes;
-  const freeShippingThreshold = 50;
-  const isEligibleForFreeShipping = subtotal >= freeShippingThreshold;
-  const progress = Math.min(100, subtotal / freeShippingThreshold * 100);
+  const total = subtotal;
 
   const navigate = useNavigate();
 
@@ -45,7 +41,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {isLoading && !cart ? (
-            <div className="text-sm text-slate-500">Loading cart...</div>
+            <div className="text-sm text-slate-500">Cargando carrito...</div>
           ) : cart?.items.length ? (
             cart.items.map((item) => (
               <div key={item.id} className="flex gap-4 border border-gray-100 rounded-xl bg-white p-4 shadow-sm relative">
@@ -59,14 +55,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <div className="w-16 h-16 rounded-md overflow-hidden bg-slate-100">
                   <img
                     src={item.product?.main_image_url_path ?? item.product?.main_image ?? ''}
-                    alt={item.product?.name ?? 'Product'}
+                    alt={item.product?.name ?? 'Producto'}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
                     <h4 className="text-sm font-bold text-slate-900 line-clamp-2">
-                      {item.product?.name ?? 'Product'}
+                      {item.product?.name ?? 'Producto'}
                     </h4>
                   </div>
                   <div className="flex items-center justify-between gap-3">
@@ -94,48 +90,30 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             ))
           ) : (
             <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
-              Your cart is empty.
+              Tu carrito está vacío.
             </div>
           )}
         </div>
 
         <div className="p-6 bg-white border-t border-slate-200 space-y-5">
-          <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-900">
-            <Truck size={18} />
-            <div>
-              <p className="font-semibold">
-                {isEligibleForFreeShipping ? 'You are eligible for free shipping!' : 'Add more items to qualify for free shipping.'}
-              </p>
-            </div>
-          </div>
-
-          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-            <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${progress}%` }} />
-          </div>
-
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-slate-600">
               <span>Subtotal</span>
               <span>€ {subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex items-center justify-between text-sm text-slate-600">
-              <span>Taxes</span>
-              <span>€ {taxes.toFixed(2)}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm text-slate-600">
-              <span>Promo</span>
-            </div>
           </div>
 
-          <Button variant="default" size="lg" className="w-full" onClick={() => { onClose(); navigate('/cart') }}>
-            <div className="text-left">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">{cart?.items.length ?? 0} artículos</p>
-              <p className="text-xl font-black">€ {total.toFixed(2)}</p>
-            </div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-              <span>Ver checkout</span>
-              <ArrowRight size={20} />
-            </div>
+          <Button variant="default" size="lg" className="w-full h-auto py-4" onClick={() => { onClose(); navigate('/cart') }}>
+            <span className="flex items-center justify-between w-full">
+              <span className="text-left">
+                <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400 block">{cart?.items.length ?? 0} artículos</span>
+                <span className="text-xl font-black">€ {total.toFixed(2)}</span>
+              </span>
+              <span className="flex items-center gap-1.5 text-sm font-semibold shrink-0">
+                Ver checkout
+                <ArrowRight size={18} />
+              </span>
+            </span>
           </Button>
         </div>
       </SheetContent>

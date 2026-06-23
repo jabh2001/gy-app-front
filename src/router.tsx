@@ -4,17 +4,18 @@ import ClientLayout from '@/components/own/layouts/client-layout'
 import AdminLayout from '@/components/own/layouts/admin-layout'
 import HomePage from '@/pages/home-page'
 import AboutPage from './pages/about-page'
+import ContactPage from './pages/contact-page'
+import ShopPage from './pages/shop-page'
 import LoginPage from '@/pages/login-page'
 import RegisterPage from '@/pages/register-page'
 import LogoutPage from '@/pages/logout-page'
 
-const ShopPage = lazy(() => import('@/pages/shop-page'))
 const ProductDetailPage = lazy(() => import('@/pages/product-detail-page'))
 const CartPage = lazy(() => import('@/pages/cart-page'))
 const OrderDetailPage = lazy(() => import('@/pages/order-detail-page'))
 const ProfilePage = lazy(() => import('@/pages/profile-page'))
 const OrdersPage = lazy(() => import('@/pages/orders-page'))
-const ContactPage = lazy(() => import('@/pages/contact-page'))
+
 
 const AdminHomePage = lazy(() => import('@/pages/admin-pages/admin-home-page'))
 const ProductsIndex = lazy(() => import('@/pages/admin-pages/products/index'))

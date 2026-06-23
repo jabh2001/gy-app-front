@@ -6,19 +6,21 @@ import { AccountDrawer } from '@/components/own/account-drawer';
 import { useSession } from '@/hooks/use-session';
 import GlobalSearch from '@/components/own/GlobalSearch';
 import { useCart } from '@/hooks/api/useCart';
+import { useSettings } from '@/hooks/api';
 
 function PageHeader() {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isAccountOpen, setIsAccountOpen] = useState(false);
     const user = useSession(session => session.user);
     const { cart } = useCart();
+    const { data: settings } = useSettings();
 
     return (
             <header className="bg-black/95 text-white shadow-sm">
                 <div className="max-w-7xl mx-auto flex flex-col gap-3 px-4 py-4 md:px-12">
                     <div className="flex items-center justify-between gap-3">
                         <Link to="/" className="text-3xl font-black italic tracking-tighter">
-                            MEGATEKK
+                            {settings?.site_name || 'MEGATEKK'}
                         </Link>
 
                         <div className="flex items-center gap-2 lg:gap-4 lg:hidden">

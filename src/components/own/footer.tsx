@@ -17,7 +17,6 @@ export default function Footer() {
     <footer className="bg-muted text-muted-foreground pt-12 pb-6 px-4 md:px-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         
-        {/* Botón Volver al principio */}
         <div className="w-full text-center mb-12 border-b border-border pb-4">
           <button 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -27,18 +26,14 @@ export default function Footer() {
           </button>
         </div>
 
-        {/* Contenido Principal (Desktop) */}
         <div className="hidden md:grid grid-cols-3 gap-12 mb-16">
-          {/* Conócenos */}
           <div className="space-y-6">
             <h4 className="text-foreground font-bold uppercase tracking-tight">Conócenos</h4>
             <p className="text-sm leading-relaxed">
-               Malta’s one-stop electronics store, bringing you the latest tech at unbeatable prices. From gadgets to gaming, we deliver same-day across the island.
+              Tu tienda de electrónica de confianza, trayéndote lo último en tecnología a los mejores precios. Desde gadgets hasta gaming, entregamos en todo el país.
             </p>
             <p className="text-sm font-medium">
-               Qormi - 93 Ellul Mercer Ħal, Qormi. QRM 2680.
-                Bugibba - Wingnacourt, San Pawl il-Baħar. 
-                VAT Number: MT16528323
+              Av. Principal, Centro Comercial, Piso 1. Caracas, Venezuela.
             </p>
             <div className="flex gap-4 text-foreground">
               <CrossIcon className="cursor-pointer hover:text-primary transition-colors" size={20} />
@@ -47,10 +42,8 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Información */}
           <div className="space-y-6"></div>
 
-          {/* Suscríbete */}
           <div className="space-y-6">
             <h4 className="text-foreground font-bold uppercase tracking-tight">Suscríbete</h4>
             <p className="text-sm">Regístrese para recibir ofertas exclusivas, historias originales, eventos y más.</p>
@@ -68,17 +61,14 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Contenido Principal (Mobile Accordion - Ref: image_6c4f82.png) */}
         <div className="md:hidden space-y-4 mb-8">
           <div className="space-y-4">
             <h4 className="text-foreground font-bold uppercase tracking-tight">Conócenos</h4>
             <p className="text-sm leading-relaxed">
-               Malta’s one-stop electronics store, bringing you the latest tech at unbeatable prices. From gadgets to gaming, we deliver same-day across the island.
+              Tu tienda de electrónica de confianza, trayéndote lo último en tecnología a los mejores precios. Desde gadgets hasta gaming, entregamos en todo el país.
             </p>
             <p className="text-xs">
-                Qormi - 93 Ellul Mercer Ħal, Qormi. QRM 2680.
-                Bugibba - Wingnacourt, San Pawl il-Baħar. 
-                VAT Number: MT16528323
+              Av. Principal, Centro Comercial, Piso 1. Caracas, Venezuela.
             </p>
             <div className="flex gap-6 text-foreground pt-2">
               <CrossIcon size={24} /> <CrossIcon size={24} /> <CrossIcon size={24} />
@@ -87,14 +77,10 @@ export default function Footer() {
 
         </div>
 
-        {/* Footer Bottom */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-[10px] md:text-xs text-slate-500">
-            Copyright ©2026 Megatekk Malta. Desarrollado por Humboldtech. MegaTekk Plug Into Tomorrow y el logo MegaTekk son marcas registradas. Todos los derechos reservados.
+            Copyright &copy;2026. Todos los derechos reservados.
           </p>
-          <div className="bg-white p-2 rounded-sm shadow-sm">
-             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-4" />
-          </div>
         </div>
       </div>
 

@@ -3,6 +3,8 @@ import api from '@/api'
 import type { Product } from "@/api/models"
 import { usePaginatedQuery } from '@/hooks/api/usePaginatedQuery'
 import { getProduct } from '@/api/products'
+import { reorderProductImages } from '@/api/products'
+import type { ImageReorderItem } from '@/api/products'
 import { useDebounce } from '@/hooks/use-debounce'
 import { usePagination } from '@/hooks/use-pagination'
 import { usePage, useActive, useFeatured, useOnSale, useOrder } from '@/hooks/api/use-query-params'
@@ -70,4 +72,34 @@ export function useImportInventory() {
   }, {
     onSuccess: () => qc.invalidateQueries('products'),
   })
+}
+
+export function useUpdateProductCategories() {
+  const qc = useQueryClient()
+  return useMutation(
+    ({ productId, categoryIds }: { productId: number; categoryIds: number[] }) =>
+      api.put(`${BASE}/${productId}/`, { categories: categoryIds }),
+    {
+      onSuccess: (_data, variables) => {
+        qc.invalidateQueries('products')
+        qc.invalidateQueries(['product', variables.productId])
+        qc.invalidateQueries(['product', String(variables.productId)])
+      },
+    },
+  )
+}
+
+export function useReorderProductImages() {
+  const qc = useQueryClient()
+  return useMutation(
+    ({ productId, images }: { productId: number; images: ImageReorderItem[] }) =>
+      reorderProductImages(productId, images),
+    {
+      onSuccess: (_data, variables) => {
+        qc.invalidateQueries('products')
+        qc.invalidateQueries(['product', variables.productId])
+        qc.invalidateQueries(['product', String(variables.productId)])
+      },
+    },
+  )
 }

@@ -66,8 +66,27 @@ export async function importInventory(items: any[]): Promise<InventoryImportResp
 }
 
 // Para enviar archivo Excel
-export async function importInventoryFile(file: File): Promise<InventoryImportResponse> {
+export type ImportOptions = {
+  create_if_missing?: boolean
+  update_existing?: boolean
+}
+
+export async function importInventoryFile(file: File, options?: ImportOptions): Promise<InventoryImportResponse> {
   const formData = new FormData();
   formData.append('file', file);
+  if (options) {
+    formData.append('create_if_missing', String(options.create_if_missing ?? true));
+    formData.append('update_existing', String(options.update_existing ?? true));
+  }
   return api.post('/products/import-inventory-file/', formData);
+}
+
+export type ImageReorderItem = {
+  id: number
+  order: number
+  is_main: boolean
+}
+
+export async function reorderProductImages(productId: number, images: ImageReorderItem[]): Promise<Product> {
+  return api.put(`/products/${productId}/images/reorder/`, { images });
 }

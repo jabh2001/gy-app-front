@@ -7,9 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { FileUpload, FileUploadTrigger } from "@/components/ui/file-upload"
 import { ImagePlus, X } from "lucide-react"
 import SocialMediaIcon, { SOCIAL_PLATFORMS } from "../SocialMediaIcon"
-import { NativeImageCheckbox } from "@/components/uitripled/native-image-checkbox-shadcnui"
 
-// Interfaz actualizada para coincidir con el modelo SQLAlchemy
 export interface SettingsFormData {
   site_name: string
   site_description: string
@@ -128,7 +126,7 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
     category_max_depth: "",
     hero_images: [],
     footer_links: [],
-    social_links: []
+    social_links: [],
   })
 
   // Estado para nuevos archivos de imágenes

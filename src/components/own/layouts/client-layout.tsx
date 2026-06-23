@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { useSession } from '@/hooks/use-session';
 import CategoriesDropdown from './ui/categories-dropdown';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSettings } from '@/hooks/api';
 
 
 export default function MainLayout() {
@@ -17,6 +18,8 @@ export default function MainLayout() {
     const user = useSession((state) => state.user);
     const navigate = useNavigate()
     const title = useTitleStore((state) => state.title)
+    const { data: settings } = useSettings()
+    const siteName = settings?.site_name || 'Tienda'
 
     useEffect(() => {
         hasCheckedSession && !user && navigate("/login")
@@ -27,8 +30,8 @@ export default function MainLayout() {
     }, [checkSession]);
 
     useEffect(() => {
-        document.title = title ? `${title} | Tienda Admin` : "Tienda Admin"
-    }, [title])
+        document.title = title ? `${title} | ${siteName}` : siteName
+    }, [title, siteName])
 
     return (
         <div className="min-h-screen flex flex-col bg-white">

@@ -15,16 +15,15 @@ function mapProductToFormData(product: Product): ProductFormData {
     sale_price: String(product.sale_price ?? ""),
     stock: String(product.stock ?? ""),
     badge: product.badge ?? "",
-    mainImage: product.main_image ?? "",
-    isFeatured: product.is_featured,
-    isOnSale: product.is_on_sale,
-    isActive: product.is_active,
+    main_image: product.main_image ?? "",
+    is_featured: product.is_featured,
+    is_on_sale: product.is_on_sale,
+    is_active: product.is_active,
     description: product.description ?? "",
     images: product.images ? product.images.map((img) => {
-      // Convert image URLs to File objects if needed, or handle as necessary
-      return new File([], img.url) // Placeholder, adjust as needed
+      return new File([], img.url)
     }) : [],
-    mainImageIndex: 0,
+    main_image_index: 0,
   }
 }
 

@@ -155,6 +155,7 @@ export interface SiteSettings {
   site_description?: string | null;
   logo_url?: string | null;
   hero_images: string[];
+  banner_images: string[];
   footer_links: Array<Record<string, string>>;
   social_links: Array<Record<string, string>>;
   floating_whatsapp?: string | null;

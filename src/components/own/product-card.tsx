@@ -65,7 +65,7 @@ export function ProductCard({ product, onClickAddToCart, to }: Props) {
             disabled={isLoading}
           >
             <ShoppingCart size={18} strokeWidth={2.5} />
-            {isLoading ? 'Adding...' : 'ADD TO CART'}
+            {isLoading ? 'Añadiendo...' : 'AÑADIR AL CARRITO'}
           </Button>
         </CardFooter>
       </Card>

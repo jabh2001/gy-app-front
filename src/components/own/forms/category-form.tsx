@@ -1,50 +1,95 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 import AdminForm from "./admin-form"
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
 
 export interface CategoryFormData {
   id?: number
   name: string
   slug: string
   description: string
-  isFeatured: boolean
-  isActive: boolean
+  is_featured: boolean
+  is_active: boolean
 }
 
 interface CategoryFormProps {
   data?: CategoryFormData
   onSave: (category: CategoryFormData) => void
   onEdit: (category: CategoryFormData) => void
+  onToggleSave?: (payload: Partial<CategoryFormData>) => void
   submitLabel?: string
 }
 
-export default function CategoryForm({ data, onSave, onEdit, submitLabel = "Guardar categoría" }: CategoryFormProps) {
+export default function CategoryForm({ data, onSave, onEdit, onToggleSave, submitLabel = "Guardar categoría" }: CategoryFormProps) {
   const [formState, setFormState] = useState<CategoryFormData>({
     name: "",
     slug: "",
     description: "",
-    isFeatured: false,
-    isActive:true
+    is_featured: false,
+    is_active: true,
   })
+  const slugManuallyEdited = useRef(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const onToggleSaveRef = useRef(onToggleSave)
+  onToggleSaveRef.current = onToggleSave
+  const dataIdRef = useRef(data?.id)
+  dataIdRef.current = data?.id
 
   useEffect(() => {
     if (data) {
       setFormState(data)
+      slugManuallyEdited.current = true
     }
   }, [data])
+
+  const handleToggle = (key: "is_featured" | "is_active", checked: boolean) => {
+    setFormState((prev) => ({ ...prev, [key]: checked }))
+    if (!dataIdRef.current || !onToggleSaveRef.current) return
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      onToggleSaveRef.current?.({ id: dataIdRef.current!, [key]: checked })
+    }, 800)
+  }
+
+  useEffect(() => {
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [])
+
+  const handleNameChange = (value: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      name: value,
+      slug: slugManuallyEdited.current ? prev.slug : slugify(value),
+    }))
+  }
+
+  const handleSlugChange = (value: string) => {
+    slugManuallyEdited.current = true
+    setFormState((prev) => ({ ...prev, slug: value }))
+  }
 
   const handleChange = (key: keyof CategoryFormData, value: string | boolean) => {
     setFormState((prev) => ({ ...prev, [key]: value }))
   }
 
   const handleSubmit = () => {
-    const newData = {...formState, is_featured: formState.isFeatured, is_active: formState.isActive}
+    const newData = { ...formState }
     if (data?.id) {
       onEdit(newData)
       return
     }
     onSave(newData)
-    setFormState({ name: "", slug: "", description: "", isFeatured: false , isActive: false })
+    setFormState({ name: "", slug: "", description: "", is_featured: false, is_active: false })
+    slugManuallyEdited.current = false
   }
 
   return (
@@ -61,7 +106,7 @@ export default function CategoryForm({ data, onSave, onEdit, submitLabel = "Guar
           Nombre
           <Input
             value={formState.name}
-            onChange={(event) => handleChange("name", event.target.value)}
+            onChange={(event) => handleNameChange(event.target.value)}
             placeholder="Camisetas"
           />
         </label>
@@ -69,7 +114,7 @@ export default function CategoryForm({ data, onSave, onEdit, submitLabel = "Guar
           Slug
           <Input
             value={formState.slug}
-            onChange={(event) => handleChange("slug", event.target.value)}
+            onChange={(event) => handleSlugChange(event.target.value)}
             placeholder="camisetas"
           />
         </label>
@@ -83,24 +128,26 @@ export default function CategoryForm({ data, onSave, onEdit, submitLabel = "Guar
           placeholder="Categoría para camisetas, remeras y polos."
         />
       </label>
-      <label className="inline-flex items-center gap-2 text-sm font-medium">
-        <input
-          type="checkbox"
-          checked={formState.isActive}
-          onChange={(event) => handleChange("isActive", event.target.checked)}
-          className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+      <div className="flex items-center justify-between rounded-lg border p-3">
+        <div className="space-y-0.5">
+          <p className="text-sm font-medium">Categoría activa</p>
+          <p className="text-xs text-muted-foreground">Visible en la tienda para los clientes.</p>
+        </div>
+        <Switch
+          checked={formState.is_active}
+          onCheckedChange={(checked) => handleToggle("is_active", checked)}
         />
-        Categoría activa
-      </label>
-      <label className="inline-flex items-center gap-2 text-sm font-medium">
-        <input
-          type="checkbox"
-          checked={formState.isFeatured}
-          onChange={(event) => handleChange("isFeatured", event.target.checked)}
-          className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+      </div>
+      <div className="flex items-center justify-between rounded-lg border p-3">
+        <div className="space-y-0.5">
+          <p className="text-sm font-medium">Categoría destacada</p>
+          <p className="text-xs text-muted-foreground">Aparece en la sección de categorías destacadas.</p>
+        </div>
+        <Switch
+          checked={formState.is_featured}
+          onCheckedChange={(checked) => handleToggle("is_featured", checked)}
         />
-        Categoría destacada
-      </label>
+      </div>
     </AdminForm>
   )
 }

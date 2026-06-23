@@ -1,17 +1,54 @@
-import { useState, type FormEvent } from 'react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { useState, type FormEvent } from 'react'
+import { toast } from 'sonner'
+import { Mail, Phone, Globe, ExternalLink } from "lucide-react"
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useSettings } from "@/hooks/api"
+import {
+  FacebookLogoIcon,
+  InstagramLogoIcon,
+  TwitterLogoIcon,
+  TiktokLogoIcon,
+  YoutubeLogoIcon,
+  LinkedinLogoIcon,
+  WhatsappLogoIcon,
+  TelegramLogoIcon,
+  GithubLogoIcon,
+  DiscordLogoIcon,
+} from "@phosphor-icons/react"
+
+const SOCIAL_ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
+  facebook: FacebookLogoIcon,
+  instagram: InstagramLogoIcon,
+  twitter: TwitterLogoIcon,
+  tiktok: TiktokLogoIcon,
+  youtube: YoutubeLogoIcon,
+  linkedin: LinkedinLogoIcon,
+  whatsapp: WhatsappLogoIcon,
+  telegram: TelegramLogoIcon,
+  github: GithubLogoIcon,
+  discord: DiscordLogoIcon,
+}
+
+function getSocialIcon(name: string): React.ComponentType<{ size?: number }> | null {
+  const key = name.toLowerCase()
+  return SOCIAL_ICON_MAP[key] || null
+}
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const { data: settings } = useSettings()
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
+
+  const socialLinks = settings?.social_links || []
+  const contactEmail = settings?.contact_email
+  const floatingWhatsapp = settings?.floating_whatsapp
+  const orderWhatsapp = settings?.order_whatsapp
 
   const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    toast.info('Formulario de contacto próximamente disponible.');
-    setForm({ name: '', email: '', phone: '', message: '' });
-  };
+    e.preventDefault()
+    toast.info('Formulario de contacto próximamente disponible.')
+    setForm({ name: '', email: '', phone: '', message: '' })
+  }
 
   return (
     <div className="w-full bg-background transition-colors duration-300">
@@ -31,87 +68,78 @@ export default function ContactPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className="grid gap-1.5 text-sm font-medium">
                   Nombre completo
-                  <Input
-                    value={form.name}
-                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                    placeholder="Tu nombre"
-                    required
-                  />
+                  <Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Tu nombre" required />
                 </label>
                 <label className="grid gap-1.5 text-sm font-medium">
                   Correo electrónico
-                  <Input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                    placeholder="correo@ejemplo.com"
-                    required
-                  />
+                  <Input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} placeholder="correo@ejemplo.com" required />
                 </label>
               </div>
               <label className="grid gap-1.5 text-sm font-medium">
                 Teléfono (opcional)
-                <Input
-                  value={form.phone}
-                  onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                  placeholder="+58 412 123 4567"
-                />
+                <Input value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} placeholder="+58 412 123 4567" />
               </label>
               <label className="grid gap-1.5 text-sm font-medium">
                 Mensaje
-                <textarea
-                  value={form.message}
-                  onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))}
-                  placeholder="Escribe tu mensaje aquí..."
-                  rows={5}
-                  required
-                  className="min-h-[120px] w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                />
+                <textarea value={form.message} onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))} placeholder="Escribe tu mensaje aquí..." rows={5} required className="min-h-[120px] w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50" />
               </label>
-              <Button type="submit" className="w-full sm:w-auto">
-                Enviar mensaje
-              </Button>
+              <Button type="submit" className="w-full sm:w-auto">Enviar mensaje</Button>
             </form>
           </section>
 
           <section className="space-y-6">
-            <div className="space-y-4">
-              <ContactInfo
-                icon={<MapPin className="size-5 text-primary" />}
-                title="Dirección"
-                content="Qormi - 93 Ellul Mercer Ħal, Qormi. QRM 2680"
-              />
-              <ContactInfo
-                icon={<Phone className="size-5 text-primary" />}
-                title="Teléfono"
-                content="+356 1234 5678"
-              />
-              <ContactInfo
-                icon={<Mail className="size-5 text-primary" />}
-                title="Correo electrónico"
-                content="info@megatekk.mt"
-              />
-              <ContactInfo
-                icon={<Clock className="size-5 text-primary" />}
-                title="Horario"
-                content="Lunes a Viernes: 10:00 - 20:00 | Sábados: 10:00 - 18:00"
-              />
-            </div>
+            <h2 className="text-lg font-bold">Información de contacto</h2>
+
+            {contactEmail && (
+              <a href={`mailto:${contactEmail}`} className="flex items-center gap-3 p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Mail size={18} /></div>
+                <div><p className="text-sm font-medium">Correo electrónico</p><p className="text-sm text-muted-foreground">{contactEmail}</p></div>
+              </a>
+            )}
+
+            {floatingWhatsapp && (
+              <a href={`https://wa.me/${floatingWhatsapp.replace(/\+/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600"><Phone size={18} /></div>
+                <div><p className="text-sm font-medium">WhatsApp</p><p className="text-sm text-muted-foreground">{floatingWhatsapp}</p></div>
+              </a>
+            )}
+
+            {orderWhatsapp && orderWhatsapp !== floatingWhatsapp && (
+              <a href={`https://wa.me/${orderWhatsapp.replace(/\+/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600"><Phone size={18} /></div>
+                <div><p className="text-sm font-medium">WhatsApp (Pedidos)</p><p className="text-sm text-muted-foreground">{orderWhatsapp}</p></div>
+              </a>
+            )}
+
+            {(!contactEmail && !floatingWhatsapp && !orderWhatsapp) && (
+              <p className="text-sm text-muted-foreground italic">No hay información de contacto configurada. Ve al panel de administración para agregarla.</p>
+            )}
+
+            {socialLinks.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-base font-bold mt-6">Redes Sociales</h3>
+                {socialLinks.map((link, i) => {
+                  const name = link.name || link.platform || ""
+                  const url = link.url || ""
+                  const IconComponent = getSocialIcon(name)
+                  return (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors group">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        {IconComponent ? <IconComponent size={20} /> : <Globe size={18} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium capitalize">{name || "Red social"}</p>
+                        <p className="text-xs text-muted-foreground truncate">{url}</p>
+                      </div>
+                      <ExternalLink size={14} className="text-muted-foreground shrink-0" />
+                    </a>
+                  )
+                })}
+              </div>
+            )}
           </section>
         </div>
       </div>
     </div>
-  );
-}
-
-function ContactInfo({ icon, title, content }: { icon: React.ReactNode; title: string; content: string }) {
-  return (
-    <div className="flex items-start gap-4 rounded-xl border border-border bg-card p-4">
-      <div className="mt-0.5">{icon}</div>
-      <div>
-        <h4 className="font-semibold text-foreground">{title}</h4>
-        <p className="text-sm text-muted-foreground">{content}</p>
-      </div>
-    </div>
-  );
+  )
 }
