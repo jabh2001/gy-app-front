@@ -18,8 +18,8 @@ export default function GlobalSearch() {
     const debouncedSearch = useDebounce(searchTerm, 500)
 
     // Traemos también 'isFetching' para controlar cargas en segundo plano
-    const { data, isLoading, isFetching } = useSearchSuggestions(debouncedSearch, { 
-        enabled: isOpen && debouncedSearch.trim().length >= 2 
+    const { data, isLoading, isFetching } = useSearchSuggestions(debouncedSearch, {
+        enabled: isOpen && debouncedSearch.trim().length >= 2
     })
 
     // Control del spinner local mientras el usuario escribe
@@ -50,7 +50,7 @@ export default function GlobalSearch() {
     }
 
     const handleProductClick = (id: number | string) => {
-        navigate(`/shop/${id}`)
+        navigate(`/shop/product/${id}`)
         handleClear()
     }
 
@@ -62,16 +62,16 @@ export default function GlobalSearch() {
         e.preventDefault()
         if (searchTermTrim.length > 0) {
             navigate(`/shop/search/${encodeURIComponent(searchTermTrim)}`)
-            setIsOpen(false) 
+            setIsOpen(false)
         } else {
             navigate(`/shop`)
-            setIsOpen(false) 
+            setIsOpen(false)
         }
     }
 
     // Condición real de carga: o está escribiendo, o react-query está trayendo los datos
     const showLoader = isSearching || isLoading || isFetching
-    const showProducts = data && data.products.length > 0 
+    const showProducts = data && data.products.length > 0
     const showCategories = data && data.categories.length > 0
     const showData = showProducts || showCategories
     const showXL = showProducts && showCategories
@@ -90,7 +90,7 @@ export default function GlobalSearch() {
                         if (searchTermTrim.length > 0) setIsOpen(true)
                     }}
                 />
-            
+
                 {searchTerm && (
                     <button
                         onClick={handleClear}
@@ -106,7 +106,7 @@ export default function GlobalSearch() {
             {/* Menú Desplegable (Dropdown) */}
             {isOpen && searchTermTrim.length >= 2 && (
                 <div className={`${showXL && 'w-[150%]'} absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-xl z-50 overflow-hidden max-h-[400px] overflow-y-auto bg-white text-slate-900`}>
-                    
+
                     {showLoader ? <SearchLoaderHeader /> : showData ? (
                         <div className={`${showXL && 'grid grid-cols-[1fr_2fr]'} py-2`}>
                             {/* SECCIÓN DE CATEGORÍAS */}
@@ -145,7 +145,7 @@ export default function GlobalSearch() {
                                                 >
                                                     <div className="bg-slate-100 p-1 rounded-md size-10 flex items-center justify-center overflow-hidden border">
                                                         {item.main_image ? (
-                                                            <img src={item.main_image_url_path?? ""} alt="" className="object-cover size-full" />
+                                                            <img src={item.main_image_url_path ?? ""} alt="" className="object-cover size-full" />
                                                         ) : (
                                                             <Search className="size-4 text-slate-400" />
                                                         )}
@@ -161,7 +161,7 @@ export default function GlobalSearch() {
                                 </div>
                             )}
                         </div>
-                    ) : <SearchNotFound search={debouncedSearch} /> }
+                    ) : <SearchNotFound search={debouncedSearch} />}
                 </div>
             )}
         </div>
@@ -175,7 +175,7 @@ const SearchLoaderHeader = () => (
     </div>
 
 )
-const SearchNotFound = ({ search }:{ search:string}) => (
+const SearchNotFound = ({ search }: { search: string }) => (
     <div className="p-8 text-center text-muted-foreground">
         <p className="text-sm">No se encontraron resultados para "{search}"</p>
     </div>

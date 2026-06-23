@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { QRCodeSVG } from 'qrcode.react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useOrderDetail, useCancelOrder } from '@/hooks/api/useOrders'
 import { useSession } from '@/hooks/use-session'
+import { useSettings } from '@/hooks/api/useSettings'
 import useTitle from '@/hooks/use-title'
 
 function statusColor(status?: string) {
@@ -19,6 +21,61 @@ function fmtMoney(v?: number) {
   return (v ?? 0).toFixed(2)
 }
 
+/** Construye la URL de WhatsApp con el resumen de la orden */
+function buildWhatsAppUrl(phone: string, order: any): string {
+  const normalizedPhone = phone.replace(/\D/g, '')
+  if (!normalizedPhone) return ''
+
+  const lines: string[] = []
+  lines.push(`📦 *Pedido #${order.id}*`)
+  lines.push(`👤 Cliente: ${order.customer_name ?? 'N/A'}`)
+  lines.push(`📞 Tel: ${order.customer_phone ?? '(sin teléfono)'}`)
+  lines.push(`📋 Estado: ${order.status}`)
+  lines.push('')
+  lines.push('🛒 *Artículos:*')
+
+  if (order.items?.length) {
+    for (const item of order.items) {
+      const name = item.product?.name ?? 'Producto eliminado'
+      lines.push(`  • ${item.quantity} x ${name} — $${fmtMoney(item.price)}`)
+    }
+  }
+
+  lines.push('')
+  lines.push(`💰 *Total: $${fmtMoney(order.total)}*`)
+  lines.push(`💳 Método de pago: ${order.payment_method ?? 'N/A'}`)
+
+  if (order.billing_data_snapshot) {
+    const snap = order.billing_data_snapshot
+    lines.push('')
+    lines.push('📄 *Datos de facturación:*')
+    lines.push(`  Nombre: ${snap.full_name}`)
+    if (snap.rif) lines.push(`  RIF: ${snap.rif}`)
+    if (snap.address_line1) lines.push(`  Dirección: ${snap.address_line1}`)
+  }
+
+  lines.push('')
+  const orderUrl = window.location.href
+  lines.push(`🔗 Ver pedido: ${orderUrl}`)
+
+  // QR code como imagen accesible via URL pública
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(orderUrl)}`
+  lines.push('')
+  lines.push(`📱 *Escanea el QR para ver el pedido:*`)
+  lines.push(qrImageUrl)
+
+  const text = encodeURIComponent(lines.join('\n'))
+  return `https://wa.me/${normalizedPhone}?text=${text}`
+}
+
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+    </svg>
+  )
+}
+
 export default function OrderDetailPage() {
   useTitle('Detalle de pedido')
   const navigate = useNavigate()
@@ -27,11 +84,17 @@ export default function OrderDetailPage() {
   const orderQuery = useOrderDetail(orderId, { retry: false })
   const isAdmin = useSession((state) => state.hasRole('admin'))
   const cancelOrder = useCancelOrder()
+  const { data: settings } = useSettings()
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const order = orderQuery.data
   const canCancel = !!order && (order.status?.toLowerCase() !== 'cancelled' && order.status?.toLowerCase() !== 'cancelado')
+
+  const whatsappUrl = useMemo(() => {
+    if (!order || !settings?.order_whatsapp) return null
+    return buildWhatsAppUrl(settings.order_whatsapp, order)
+  }, [order, settings?.order_whatsapp])
 
   useEffect(() => {
     if (!orderQuery.isLoading && orderQuery.error) {
@@ -73,6 +136,17 @@ export default function OrderDetailPage() {
           </div>
           <div className="flex flex-wrap gap-3 items-center">
             <Button variant="outline" onClick={() => navigate(-1)}>Regresar</Button>
+            {whatsappUrl && (
+              <Button
+                asChild
+                className="bg-[#25D366] hover:bg-[#1da851] text-white gap-2"
+              >
+                <a href={whatsappUrl} target="_blank" rel="noreferrer">
+                  <WhatsAppIcon className="size-4" />
+                  Enviar por WhatsApp
+                </a>
+              </Button>
+            )}
             {isAdmin && (
               <>
                 <Button variant="secondary" asChild>
@@ -182,6 +256,28 @@ export default function OrderDetailPage() {
                   ))}
                 </div>
               </div>
+              {/* Código QR del pedido */}
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="rounded-2xl border-2 border-white bg-white p-3 shadow-sm">
+                      <QRCodeSVG
+                        value={window.location.href}
+                        size={140}
+                        level="M"
+                        marginSize={0}
+                        fgColor="#1e293b"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
+                    <p className="text-sm font-medium">Código QR del pedido</p>
+                    <p className="mt-1 text-sm text-slate-500">Escanea este código QR para acceder directamente al detalle de este pedido desde cualquier dispositivo.</p>
+                    <p className="mt-2 max-w-xs truncate rounded-lg bg-white px-3 py-1.5 text-xs font-mono text-slate-500 border border-slate-200">{window.location.href}</p>
+                  </div>
+                </div>
+              </div>
+
               {(statusMessage || errorMessage) && (
                 <div>
                   {statusMessage && <p className="text-sm text-emerald-600">{statusMessage}</p>}
