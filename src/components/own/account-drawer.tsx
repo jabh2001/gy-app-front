@@ -55,7 +55,7 @@ export function AccountDrawer({
             </div>
 
             <SheetTitle className="text-[17px] font-semibold text-black">
-              Guest
+              {user?.username || 'Invitado'}
             </SheetTitle>
           </div>
 
@@ -63,7 +63,7 @@ export function AccountDrawer({
             <button
               type="button"
               className="rounded-full p-2 text-slate-900 transition hover:bg-slate-100"
-              aria-label="Close account drawer"
+              aria-label="Cerrar cuenta"
             >
               <X className="h-5 w-5" />
             </button>

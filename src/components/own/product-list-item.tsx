@@ -49,7 +49,7 @@ export function ProductListItem({ product }: { product: Product }) {
               className="w-full md:w-auto px-8 font-bold text-xs uppercase tracking-wider h-12 rounded-[calc(var(--radius)-4px)] shadow-sm flex items-center justify-center gap-2 group-active:scale-95 transition-transform"
             >
               <ShoppingCart size={20} strokeWidth={2.5} />
-              ADD TO CART
+              AÑADIR AL CARRITO
             </Button>
           </div>
 

@@ -32,7 +32,6 @@ export function useSearchSuggestions(q: string, options?: any) {
       const response = await api.get('/search/suggestions/', {
         params: { q: debouncedSearch }
       })
-      console.log({ response })
       return response as any
     },
     {

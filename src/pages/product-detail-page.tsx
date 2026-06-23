@@ -22,25 +22,28 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: product, isLoading, error } = useProductDetail(id); //
   const { addToCart } = useCart();
-  
+
+  const images = product?.images?.length
+    ? [...product.images].sort((a, b) => a.order - b.order)
+    : [];
+
+  const mainImageIndex = images.findIndex(img => img.is_main);
+
   // Estados Locales para la UI
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(
+    mainImageIndex >= 0 ? mainImageIndex : 0
+  );
   const [quantity, setQuantity] = useState(1);
 
 //   if (isLoading) return <ProductDetailSkeleton />;
   if (error || !product) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-4">
-        <h2 className="text-2xl font-bold">Product not found {id}</h2>
-        <Link to="/shop" className="text-primary hover:underline">Return to Shop</Link>
+        <h2 className="text-2xl font-bold">Producto no encontrado {id}</h2>
+        <Link to="/shop" className="text-primary hover:underline">Volver a la tienda</Link>
       </div>
     );
   }
-
-  // Fallback si el producto no trae un array de imágenes mapeado en tu base de datos
-  const images = product.images && product.images.length > 0 
-    ? product.images 
-    : [];
 
   const handleQuantityChange = (type: 'inc' | 'dec') => {
     if (type === 'inc') {
@@ -85,13 +88,18 @@ export default function ProductDetailPage() {
           <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 shrink-0">
             {images.map((img, idx: number) => (
               <button
-                key={`img_tum_${idx}`}
+                key={`img_tum_${img.id || idx}`}
                 onClick={() => setActiveImageIndex(idx)}
-                className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0 bg-card ${
+                className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0 bg-card ${
                   activeImageIndex === idx ? 'border-yellow-400 shadow-sm' : 'border-border hover:border-muted-foreground'
                 }`}
               >
-                <img src={img.url_path} alt={`Thumbnail ${idx}`} className="w-full h-full object-contain p-1" />
+                <img src={img.url_path} alt={`Miniatura ${idx + 1}`} className="w-full h-full object-contain p-1" />
+                {img.is_main && (
+                  <span className="absolute -top-1 -right-1 bg-amber-400 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold shadow">
+                    ★
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -99,14 +107,19 @@ export default function ProductDetailPage() {
           {/* Visor de Imagen Principal */}
           <div className="flex-1 order-1 md:order-2 bg-white border border-border rounded-2xl overflow-hidden p-6 relative flex items-center justify-center min-h-[400px] md:min-h-[500px]">
             <img 
-              src={images[activeImageIndex].url_path ?? ""} 
+              src={images[activeImageIndex]?.url_path ?? ""} 
               alt={product.name} 
               className="max-h-[450px] object-contain transition-all duration-300"
             />
             
-            {/* Tag Flotante "Sale" (Réplica exacta de la estrella/círculo rojo de tu imagen) */}
+            {images[activeImageIndex]?.is_main && (
+              <div className="absolute top-4 left-4 bg-amber-400 text-black text-xs font-bold px-2 py-1 rounded-full shadow">
+                ★ Principal
+              </div>
+            )}
+
             <div className="absolute top-4 right-4 bg-red-600 text-white text-xs font-black uppercase px-3 py-3 rounded-full tracking-wider shadow-lg transform rotate-12 flex items-center justify-center aspect-square h-14 w-14 border-2 border-dashed border-white animate-pulse">
-              Sale
+              Oferta
             </div>
           </div>
         </div>
@@ -148,19 +161,19 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Botón Principal Add to Cart */}
+            {/* Botón Principal Añadir al carrito */}
             <Button 
               onClick={() => addToCart(product.id, quantity)}
               className="flex-1 h-12 bg-[#F2E300] hover:bg-[#D4C700] text-black font-extrabold text-sm rounded-lg shadow-sm transition-all tracking-wide"
             >
-              Add to Cart
+              Añadir al carrito
             </Button>
           </div>
 
           {/* Estado de Stock e Interacciones */}
           <div className="space-y-3 pt-1">
             <div className="flex items-center gap-1.5 text-sm font-bold text-green-600">
-              <span>✓ In stock</span>
+              <span>✓ En stock</span>
             </div>
           </div>
 
@@ -170,8 +183,8 @@ export default function ProductDetailPage() {
               HISENSE
             </div>
             <div className="p-4 text-xs text-muted-foreground leading-relaxed">
-              <span className="font-bold text-foreground block uppercase text-[10px] tracking-wider mb-0.5">Brand Partner</span>
-              Immersive visuals, smart features, affordable premium TVs.
+              <span className="font-bold text-foreground block uppercase text-[10px] tracking-wider mb-0.5">Marca Aliada</span>
+              Imágenes inmersivas, funciones inteligentes, TVs premium accesibles.
             </div>
           </div>
 
@@ -180,14 +193,14 @@ export default function ProductDetailPage() {
             <div className="flex items-center justify-between p-4 hover:bg-accent/30 cursor-pointer transition-colors group">
               <div className="flex items-center gap-3 text-muted-foreground font-medium group-hover:text-foreground">
                 <FileText size={16} className="text-primary/70" />
-                <span>This product includes Standard EU warranty.</span>
+                <span>Este producto incluye garantía estándar.</span>
               </div>
-              <span className="font-bold text-foreground text-[11px] flex items-center gap-0.5">Details <ChevronRight size={12} /></span>
+              <span className="font-bold text-foreground text-[11px] flex items-center gap-0.5">Detalles <ChevronRight size={12} /></span>
             </div>
             <div className="flex items-center justify-between p-4 hover:bg-accent/30 cursor-pointer transition-colors group">
               <div className="flex items-center gap-3 text-muted-foreground font-medium group-hover:text-foreground">
                 <Info size={16} className="text-primary/70" />
-                <span>Full delivery information for Malta & Gozo</span>
+                <span>Información completa de entrega</span>
               </div>
               <span className="font-bold text-foreground text-[11px] flex items-center gap-0.5">Details <ChevronRight size={12} /></span>
             </div>
@@ -201,8 +214,8 @@ export default function ProductDetailPage() {
               <div className="bg-amber-100 dark:bg-amber-950/40 p-2 rounded-full text-amber-600 mb-1">
                 <Truck size={18} />
               </div>
-              <h4 className="text-xs font-bold text-foreground">Same-day delivery across Malta!</h4>
-              <p className="text-[10px] text-muted-foreground italic">*Excluding Sundays and public holidays.</p>
+              <h4 className="text-xs font-bold text-foreground">¡Entrega el mismo día!</h4>
+              <p className="text-[10px] text-muted-foreground italic">*Excepto domingos y feriados.</p>
             </div>
 
             {/* Pasarela segura */}
@@ -210,7 +223,7 @@ export default function ProductDetailPage() {
               <div className="bg-blue-100 dark:bg-blue-950/40 p-2 rounded-full text-blue-600">
                 <ShieldCheck size={18} />
               </div>
-              <h4 className="text-xs font-bold text-foreground">Guaranteed Safe Checkout</h4>
+              <h4 className="text-xs font-bold text-foreground">Pago Seguro Garantizado</h4>
               
               {/* Badges Falsos / Logos de pago estilizados */}
               <div className="flex items-center justify-center gap-1 flex-wrap pt-1">
@@ -231,7 +244,7 @@ export default function ProductDetailPage() {
               <span className="text-foreground font-semibold">{product.sku || '100E7QPRO'}</span>
             </div>
             <div className="flex justify-between">
-              <span>Tags</span>
+              <span>Etiquetas</span>
               <span className="text-foreground font-semibold uppercase bg-accent px-1.5 py-0.2 rounded text-[10px]">SALE</span>
             </div>
           </div>

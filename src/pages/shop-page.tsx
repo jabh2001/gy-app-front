@@ -57,7 +57,7 @@ export default function ShopPage() {
           {/* Toolbar */}
           <div className="flex justify-between items-center border-b border-border pb-4">
             <div className="flex items-center gap-4">
-              <span className="text-xs font-medium text-muted-foreground">Sort By : Newest Arrivals</span>
+              <span className="text-xs font-medium text-muted-foreground">Ordenar por: Más recientes</span>
               <div className="flex border border-border rounded-md overflow-hidden">
                 <Button
                   variant={viewMode === 'grid' ? 'secondary' : 'ghost'}

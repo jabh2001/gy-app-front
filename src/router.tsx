@@ -3,6 +3,7 @@ import ClientLayout from '@/components/own/layouts/client-layout'
 import HomePage from '@/pages/home-page'
 import AdminLayout from '@/components/own/layouts/admin-layout'
 import AboutPage from './pages/about-page'
+import ContactPage from './pages/contact-page'
 import ShopPage from './pages/shop-page'
 import LoginPage from '@/pages/login-page'
 import RegisterPage from '@/pages/register-page'
@@ -34,7 +35,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "/about", element: <AboutPage /> },
-      { path: "/contact", element: <AboutPage /> },
+      { path: "/contact", element: <ContactPage /> },
       { 
         path: "/shop",
         children:[

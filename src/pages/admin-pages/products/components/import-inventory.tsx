@@ -10,6 +10,7 @@ import {
 
 import { InventoryUpload } from "@/components/own/forms/inventory-import-form"
 import { importInventoryFile } from "@/api/products"
+import type { ImportOptions } from "@/api/products"
 
 type Props = {
     children: React.ReactNode
@@ -20,7 +21,7 @@ export default function ImportInventory({ children }: Props) {
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Importar inventario</DialogTitle>
                 <DialogDescription>
@@ -29,14 +30,9 @@ export default function ImportInventory({ children }: Props) {
               </DialogHeader>
 
               <InventoryUpload
-                importInventoryFile={async (file) => {
-                  await importInventoryFile(file)
-                  return {
-                    success: true,
-                    message: "Inventario importado exitosamente",
-                    created: 10,
-                    updated: 5,
-                  }
+                importInventoryFile={async (file: File, options: ImportOptions) => {
+                  const result = await importInventoryFile(file, options)
+                  return result
                 }}
               />
             </DialogContent>

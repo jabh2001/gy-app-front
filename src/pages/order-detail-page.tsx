@@ -129,7 +129,7 @@ export default function OrderDetailPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <p className="text-sm font-medium">Método de pago</p>
-                  <p>{order?.payment_method ?? 'N/A'}</p>
+                  <p>{order?.payment_method ?? 'N/D'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Total</p>
@@ -148,8 +148,8 @@ export default function OrderDetailPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-sm font-medium">Cliente</p>
-                  <p>{orderQuery.data.customer_name ?? 'N/A'}</p>
-                  <p className="text-sm text-slate-600">{orderQuery.data.customer_phone ?? 'N/A'}</p>
+                  <p>{orderQuery.data.customer_name ?? 'N/D'}</p>
+                  <p className="text-sm text-slate-600">{orderQuery.data.customer_phone ?? 'N/D'}</p>
                 </div>
                 <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-sm font-medium">Perfil de facturación</p>
@@ -175,7 +175,7 @@ export default function OrderDetailPage() {
                       <div>
                         <p className="font-medium">{item.product?.name ?? 'Producto eliminado'}</p>
                         <p className="text-sm text-slate-600">Cantidad: {item.quantity} · Precio unitario: ${fmtMoney(item.price)}</p>
-                        {isAdmin && item.product && <p className="text-xs text-slate-500">SKU: {item.product.sku ?? 'N/A'}</p>}
+                        {isAdmin && item.product && <p className="text-xs text-slate-500">SKU: {item.product.sku ?? 'N/D'}</p>}
                       </div>
                       <p className="text-right font-semibold">${fmtMoney(item.price * item.quantity)}</p>
                     </div>

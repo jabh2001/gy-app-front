@@ -57,6 +57,7 @@ const mapToFormData = (setting:SiteSettings) => ({
   category_max_children:setting.category_max_children ?? 0,
   category_max_depth:setting.category_max_depth ?? 0,
   hero_images:setting.hero_images,
+  banner_images:setting.banner_images,
   footer_links:setting.footer_links,
   social_links:setting.social_links,
 })

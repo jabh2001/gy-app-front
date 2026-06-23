@@ -1,10 +1,8 @@
 import {
     Boxes,
     DollarSign,
-    Star,
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
 import type { Product } from "@/api/models"
@@ -16,10 +14,11 @@ export default function ProductCard({ product }: Props) {
     const navigate = useNavigate()
     return (
         <Card
-            className="group overflow-hidden rounded border-border/70 bg-card transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+            className="group overflow-hidden rounded border-border/70 bg-card transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md cursor-pointer"
+            onClick={() => navigate(`detail/${product.id}`)}
         >
             <div className="flex gap-4 p-4">
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center  border border-border/60 bg-muted/60 text-muted-foreground shadow-inner">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center border border-border/60 bg-muted/60 text-muted-foreground shadow-inner">
                     <img src={product.main_image_url_path!} alt={product.name} className="h-full w-full object-cover" />
                 </div>
 
@@ -33,16 +32,6 @@ export default function ProductCard({ product }: Props) {
                                 [{product.sku}]
                             </p>
                         </div>
-
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 shrink-0 rounded-full text-muted-foreground hover:text-primary"
-                            aria-label={`Marcar ${product.name} como favorito`}
-                        >
-                            <Star className={product.is_featured ? "h-4 w-4 fill-amber-500 text-amber-500" : "h-4 w-4"} />
-                        </Button>
                     </div>
 
                     {product.description ? (
@@ -71,25 +60,6 @@ export default function ProductCard({ product }: Props) {
                         </span>
                     ) : null}
                 </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 border-t border-border/60 bg-muted/20 px-4 py-3">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 rounded-xl"
-                    onClick={() => navigate(`edit/${product.id}`)}
-                >
-                    Editar
-                </Button>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    className="h-8 rounded-xl"
-                    onClick={() => navigate(`detail/${product.id}`)}
-                >
-                    Ver detalle
-                </Button>
             </div>
         </Card>
     )

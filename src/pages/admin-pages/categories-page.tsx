@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import CategoryForm, { type CategoryFormData } from "@/components/own/forms/category-form"
 
 const initialCategories: CategoryFormData[] = [
-  { id: 1, name: "Camisetas", slug: "camisetas", description: "Ropa para hombre y mujer.", isFeatured: true },
-  { id: 2, name: "Accesorios", slug: "accesorios", description: "Bolsos, gorras y complementos.", isFeatured: false },
+  { id: 1, name: "Camisetas", slug: "camisetas", description: "Ropa para hombre y mujer.", is_featured: true },
+  { id: 2, name: "Accesorios", slug: "accesorios", description: "Bolsos, gorras y complementos.", is_featured: false },
 ]
 
 export default function CategoriesPage() {
@@ -19,7 +19,7 @@ export default function CategoriesPage() {
         <tr key={category.id} className="border-b border-border/60">
           <td className="px-4 py-3 text-sm text-foreground">{category.name}</td>
           <td className="px-4 py-3 text-sm text-muted-foreground">{category.slug}</td>
-          <td className="px-4 py-3 text-sm text-foreground">{category.isFeatured ? "Sí" : "No"}</td>
+          <td className="px-4 py-3 text-sm text-foreground">{category.is_featured ? "Sí" : "No"}</td>
           <td className="px-4 py-3 text-right">
             <Button
               variant="outline"

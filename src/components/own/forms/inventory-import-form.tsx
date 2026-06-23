@@ -13,27 +13,28 @@ import {
   FileUploadList,
   FileUploadTrigger,
 } from "@/components/ui/file-upload";
+import type { ImportOptions } from "@/api/products";
 
 type Props = {
-    importInventoryFile: (file: File) => Promise<{ success: boolean; message?: string; created?: number; updated?: number }>
+    importInventoryFile: (file: File, options: ImportOptions) => Promise<{ success: boolean; message?: string; created?: number; updated?: number }>
 }
 export function InventoryUpload({ importInventoryFile }: Props) {
   const [files, setFiles] = React.useState<File[]>([]);
   const [uploading, setUploading] = React.useState(false);
+  const [createIfMissing, setCreateIfMissing] = React.useState(true);
+  const [updateExisting, setUpdateExisting] = React.useState(true);
 
   const onFileReject = React.useCallback((_file: File, _message: string) => {
-    // toast(message, {
-    //   description: `"${file.name.length > 20 ? `${file.name.slice(0, 20)}...` : file.name}" ha sido rechazado`,
-    // });
   }, []);
 
   const handleUpload = async () => {
-    // haz el proceso completo de subida aquí, por ejemplo:
     if (files.length === 0) return;
     setUploading(true);
-    importInventoryFile(files[0]).finally(() => {
+    importInventoryFile(files[0], {
+      create_if_missing: createIfMissing,
+      update_existing: updateExisting,
+    }).finally(() => {
       setUploading(false);
-    //   setFiles([]);
     });
   }
 
@@ -75,6 +76,30 @@ export function InventoryUpload({ importInventoryFile }: Props) {
           ))}
         </FileUploadList>
       </FileUpload>
+
+      <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
+        <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <input
+            type="checkbox"
+            checked={createIfMissing}
+            onChange={(e) => setCreateIfMissing(e.target.checked)}
+            className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+          />
+          Crear productos que no existan
+        </label>
+        <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <input
+            type="checkbox"
+            checked={updateExisting}
+            onChange={(e) => setUpdateExisting(e.target.checked)}
+            className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+          />
+          Actualizar datos de productos existentes
+        </label>
+        <p className="text-[11px] text-muted-foreground pl-6">
+          Al actualizar se modificarán nombre, SKU, categoría, stock y precio de costo. El precio de venta no se modificará.
+        </p>
+      </div>
 
       <Button
         className="mt-2"
