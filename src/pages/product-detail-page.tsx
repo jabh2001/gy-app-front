@@ -135,7 +135,7 @@ export default function ProductDetailPage() {
           {/* Bloque de Precios */}
           <div className="flex items-baseline gap-3 flex-wrap">
             <span className="text-3xl font-extrabold text-foreground">
-              {(product.price * quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })} $
+              ${(product.price * quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
             </span>
           </div>
 

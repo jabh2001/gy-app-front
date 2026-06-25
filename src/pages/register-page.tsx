@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { showApiError } from '@/api/index';
 import { useSession } from '@/hooks/use-session';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +27,7 @@ export default function RegisterPage() {
       toast.success('Cuenta creada correctamente.');
       navigate('/');
     } catch (err) {
-      toast.error('No se pudo crear la cuenta. Revisa los datos e intenta de nuevo.');
+      showApiError(err, 'No se pudo crear la cuenta');
     }
   };
 

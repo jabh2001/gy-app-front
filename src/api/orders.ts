@@ -20,6 +20,16 @@ export type CheckoutPayload = {
   payment_method: string
 }
 
+export type OrderStats = {
+  counts: Record<string, number>
+  total_revenue: number
+  total_orders: number
+}
+
+export type UpdateOrderStatusPayload = {
+  status: string
+}
+
 export async function listOrders(params: ListOrdersParams = {}): Promise<PaginatedOrdersResponse> {
   return api.get('/orders/', { params })
 }
@@ -34,4 +44,15 @@ export async function cancelOrder(orderId: number): Promise<{ message: string; o
 
 export async function downloadInvoice(orderId: number): Promise<Blob> {
   return api.get(`/orders/${orderId}/invoice/`, { responseType: 'blob' })
+}
+
+export async function updateOrderStatus(
+  orderId: number,
+  payload: UpdateOrderStatusPayload
+): Promise<{ message: string; order: Order }> {
+  return api.patch(`/orders/${orderId}/status/`, payload)
+}
+
+export async function getOrdersStats(): Promise<OrderStats> {
+  return api.get('/orders/stats/')
 }

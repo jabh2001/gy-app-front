@@ -1,28 +1,86 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { QRCodeSVG } from 'qrcode.react'
+import { showApiError } from '@/api/index'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useOrderDetail, useCancelOrder } from '@/hooks/api/useOrders'
+import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useOrderDetail, useCancelOrder, useUpdateOrderStatus } from '@/hooks/api/useOrders'
 import { useSession } from '@/hooks/use-session'
 import { useSettings } from '@/hooks/api/useSettings'
 import useTitle from '@/hooks/use-title'
+import {
+  ArrowLeft,
+  Calendar,
+  CreditCard,
+  User,
+  Phone,
+  MapPin,
+  FileText,
+  Printer,
+  Package,
+  MessageCircle,
+  XCircle,
+  RefreshCcw,
+  Truck,
+  CheckCircle2,
+  Clock,
+  RotateCcw,
+} from 'lucide-react'
 
-function statusColor(status?: string) {
-  const s = (status || '').toLowerCase()
-  if (s === 'pending') return 'bg-amber-100 text-amber-800'
-  if (s === 'invoiced') return 'bg-sky-100 text-sky-800'
-  if (s === 'completed') return 'bg-emerald-100 text-emerald-800'
-  if (s === 'cancelled' || s === 'cancelado') return 'bg-red-100 text-red-800'
-  return 'bg-gray-100 text-gray-800'
+const ORDER_STATUSES = [
+  { value: 'pending', label: 'Pendiente', icon: Clock },
+  { value: 'invoiced', label: 'Facturado', icon: CreditCard },
+  { value: 'completed', label: 'Completado', icon: CheckCircle2 },
+  { value: 'cancelled', label: 'Cancelado', icon: XCircle },
+]
+
+function normalizeStatus(status?: string) {
+  return (status || '').toLowerCase()
+}
+
+function statusConfig(status?: string) {
+  const s = normalizeStatus(status)
+  switch (s) {
+    case 'pending':
+      return { label: 'Pendiente', variant: 'warning' as const, icon: Clock }
+    case 'invoiced':
+      return { label: 'Facturado', variant: 'info' as const, icon: CreditCard }
+    case 'completed':
+      return { label: 'Completado', variant: 'success' as const, icon: CheckCircle2 }
+    case 'cancelled':
+    case 'cancelado':
+      return { label: 'Cancelado', variant: 'destructive' as const, icon: XCircle }
+    default:
+      return { label: status || 'Desconocido', variant: 'secondary' as const, icon: Package }
+  }
 }
 
 function fmtMoney(v?: number) {
   return (v ?? 0).toFixed(2)
 }
 
-/** Construye la URL de WhatsApp con el resumen de la orden */
+function fmtDate(value?: string | null) {
+  if (!value) return 'No disponible'
+  return new Date(value).toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 function buildWhatsAppUrl(phone: string, order: any): string {
   const normalizedPhone = phone.replace(/\D/g, '')
   if (!normalizedPhone) return ''
@@ -58,8 +116,6 @@ function buildWhatsAppUrl(phone: string, order: any): string {
   lines.push('')
   const orderUrl = window.location.href
   lines.push(`🔗 Ver pedido: ${orderUrl}`)
-
-  // QR code como imagen accesible via URL pública
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(orderUrl)}`
   lines.push('')
   lines.push(`📱 *Escanea el QR para ver el pedido:*`)
@@ -83,11 +139,20 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>()
   const orderId = id ? Number(id) : undefined
   const orderQuery = useOrderDetail(orderId, { retry: false })
+  const user = useSession((state) => state.user)
   const isAdmin = useSession((state) => state.hasRole('admin'))
   const cancelOrder = useCancelOrder()
+  const updateStatus = useUpdateOrderStatus()
   const { data: settings } = useSettings()
   const order = orderQuery.data
-  const canCancel = !!order && (order.status?.toLowerCase() !== 'cancelled' && order.status?.toLowerCase() !== 'cancelado')
+  const [statusValue, setStatusValue] = useState(order?.status || '')
+
+  useEffect(() => {
+    if (order?.status) setStatusValue(order.status)
+  }, [order?.status])
+
+  const canCancel = !!order && !['cancelled', 'cancelado'].includes(normalizeStatus(order.status))
+  const canUpdateStatus = isAdmin && !!order && !['cancelled', 'cancelado'].includes(normalizeStatus(order.status))
 
   const whatsappUrl = useMemo(() => {
     if (!order || !settings?.order_whatsapp) return null
@@ -106,18 +171,50 @@ export default function OrderDetailPage() {
     }
   }, [orderQuery.isLoading, orderQuery.error, navigate])
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/login', { replace: true })
+    }
+  }, [user, navigate])
+
+  const handleCancel = async () => {
+    if (!orderId) return
+    try {
+      await cancelOrder.mutateAsync(orderId)
+      toast.success('Pedido cancelado correctamente.')
+      orderQuery.refetch()
+    } catch (err) {
+      showApiError(err, 'No se pudo cancelar el pedido')
+    }
+  }
+
+  const handleStatusChange = async (value: string) => {
+    if (!orderId || value === order?.status) return
+    try {
+      await updateStatus.mutateAsync({ orderId, payload: { status: value } })
+      toast.success('Estado del pedido actualizado.')
+      orderQuery.refetch()
+    } catch (err) {
+      showApiError(err, 'No se pudo actualizar el estado')
+    }
+  }
+
   const billingSnapshot = useMemo(() => order?.billing_data_snapshot ?? null, [order])
+  const cfg = statusConfig(order?.status)
+  const StatusIcon = cfg.icon
 
   if (!orderId) {
     return (
-      <main className="min-h-screen bg-gray-50 px-4 py-8">
+      <main className="min-h-screen bg-background px-4 py-8">
         <div className="mx-auto max-w-5xl space-y-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-3xl font-semibold">Pedido inválido</h1>
-              <p className="text-sm text-slate-500">No se pudo cargar el pedido solicitado.</p>
+              <p className="text-sm text-muted-foreground">No se pudo cargar el pedido solicitado.</p>
             </div>
-            <Button variant="outline" onClick={() => navigate('/')}>Volver al inicio</Button>
+            <Button variant="outline" onClick={() => navigate('/orders')}>
+              Volver a pedidos
+            </Button>
           </div>
         </div>
       </main>
@@ -125,157 +222,249 @@ export default function OrderDetailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
+    <main className="min-h-screen bg-background px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold">Detalle del pedido</h1>
-            <p className="text-sm text-slate-500">Visualiza el estado, artículos y datos de facturación del pedido.</p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+              <Link to="/orders" className="hover:text-foreground transition-colors">Mis pedidos</Link>
+              <span>/</span>
+              <span>Detalle</span>
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight">Pedido #{order?.id}</h1>
+            <p className="text-sm text-muted-foreground">Visualiza el estado, artículos y datos de facturación.</p>
           </div>
           <div className="flex flex-wrap gap-3 items-center">
-            <Button variant="outline" onClick={() => navigate(-1)}>Regresar</Button>
+            <Button variant="outline" onClick={() => navigate('/orders')}>
+              <ArrowLeft className="size-4 mr-2" />
+              Volver
+            </Button>
             {whatsappUrl && (
-              <Button
-                asChild
-                className="bg-[#25D366] hover:bg-[#1da851] text-white gap-2"
-              >
+              <Button asChild className="bg-[#25D366] hover:bg-[#1da851] text-white gap-2">
                 <a href={whatsappUrl} target="_blank" rel="noreferrer">
                   <WhatsAppIcon className="size-4" />
                   Enviar por WhatsApp
                 </a>
               </Button>
             )}
-            {isAdmin && (
-              <>
-                <Button variant="secondary" asChild>
-                  <a href={`/api/orders/${orderId}/invoice/`} target="_blank" rel="noreferrer">Descargar factura</a>
-                </Button>
-                <Button variant="destructive" onClick={async () => {
-                  if (!orderId) return
-                  try {
-                    await cancelOrder.mutateAsync(orderId)
-                    toast.success('Pedido cancelado correctamente.')
-                    orderQuery.refetch()
-                  } catch (err) {
-                    toast.error('No se pudo cancelar el pedido.')
-                  }
-                }} disabled={!canCancel || cancelOrder.isLoading}>
-                  {cancelOrder.isLoading ? 'Cancelando...' : 'Cancelar pedido'}
-                </Button>
-              </>
+            <Button variant="secondary" asChild>
+              <a href={`/api/orders/${orderId}/invoice/`} target="_blank" rel="noreferrer">
+                <FileText className="size-4 mr-2" />
+                Factura
+              </a>
+            </Button>
+            <Button variant="outline" onClick={() => window.print()}>
+              <Printer className="size-4 mr-2" />
+              Imprimir
+            </Button>
+            {canCancel && (
+              <Button
+                variant="destructive"
+                onClick={handleCancel}
+                disabled={cancelOrder.isLoading}
+              >
+                <XCircle className="size-4 mr-2" />
+                {cancelOrder.isLoading ? 'Cancelando...' : 'Cancelar pedido'}
+              </Button>
             )}
           </div>
         </div>
 
         {orderQuery.isLoading ? (
           <Card>
-            <CardContent>Cargando pedido...</CardContent>
+            <CardContent className="p-6">
+              <Skeleton className="h-8 w-1/3 mb-4" />
+              <Skeleton className="h-24 w-full" />
+            </CardContent>
           </Card>
         ) : orderQuery.error ? (
-          <Card>
-            <CardContent>Error cargando el pedido.</CardContent>
+          <Card className="border-destructive/50">
+            <CardContent className="p-6 text-destructive">Error cargando el pedido.</CardContent>
           </Card>
-        ) : !orderQuery.data ? (
+        ) : !order ? (
           <Card>
-            <CardContent>
-              <p className="text-sm text-slate-500">No se encontró el pedido solicitado.</p>
+            <CardContent className="p-6">
+              <p className="text-sm text-muted-foreground">No se encontró el pedido solicitado.</p>
             </CardContent>
           </Card>
         ) : (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Pedido #{order?.id}</CardTitle>
-                  <CardDescription className="capitalize">{order?.status}</CardDescription>
-                </div>
-                <div className={`rounded-full px-3 py-1 text-sm font-medium ${statusColor(order?.status)}`}>
-                  {order?.status}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <p className="text-sm font-medium">Método de pago</p>
-                  <p>{order?.payment_method ?? 'N/D'}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Total</p>
-                  <p>${fmtMoney(order?.total)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Estado</p>
-                  <p className="capitalize">{order?.status}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Fecha</p>
-                  <p>{order?.created_at ?? 'No disponible'}</p>
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-sm font-medium">Cliente</p>
-                  <p>{orderQuery.data.customer_name ?? 'N/D'}</p>
-                  <p className="text-sm text-slate-600">{orderQuery.data.customer_phone ?? 'N/D'}</p>
-                </div>
-                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-sm font-medium">Perfil de facturación</p>
-                  {billingSnapshot ? (
-                    <div className="space-y-1 text-sm text-slate-700">
-                      <p className="font-medium">{billingSnapshot.full_name}</p>
-                      <p>{billingSnapshot.address_line1}</p>
-                      <p>RIF: {billingSnapshot.rif}</p>
-                      {billingSnapshot.phone && <p>Tel: {billingSnapshot.phone}</p>}
-                      {isAdmin && order?.user_id && <p className="text-xs text-slate-500">Usuario ID: {order.user_id}</p>}
+          <>
+            <Card className="border-border">
+              <CardHeader>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <CardTitle className="text-2xl">Pedido #{order.id}</CardTitle>
+                    <Badge variant={cfg.variant} className="gap-1 capitalize text-sm">
+                      <StatusIcon className="size-3.5" />
+                      {cfg.label}
+                    </Badge>
+                  </div>
+                  {canUpdateStatus && (
+                    <div className="flex items-center gap-2">
+                      <RefreshCcw className="size-4 text-muted-foreground" />
+                      <Select value={statusValue} onValueChange={handleStatusChange} disabled={updateStatus.isLoading}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Cambiar estado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ORDER_STATUSES.map((s) => (
+                            <SelectItem key={s.value} value={s.value}>
+                              <span className="flex items-center gap-2">
+                                <s.icon className="size-3.5" />
+                                {s.label}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  ) : (
-                    <p className="text-sm text-slate-500">No hay datos de facturación disponibles.</p>
                   )}
                 </div>
-              </div>
-
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-medium">Artículos</p>
-                <div className="mt-4 space-y-3">
-                  {order?.items.map((item) => (
-                    <div key={item.id} className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-[1fr_auto]">
-                      <div>
-                        <p className="font-medium">{item.product?.name ?? 'Producto eliminado'}</p>
-                        <p className="text-sm text-slate-600">Cantidad: {item.quantity} · Precio unitario: ${fmtMoney(item.price)}</p>
-                        {isAdmin && item.product && <p className="text-xs text-slate-500">SKU: {item.product.sku ?? 'N/D'}</p>}
-                      </div>
-                      <p className="text-right font-semibold">${fmtMoney(item.price * item.quantity)}</p>
-                    </div>
-                  ))}
+                <CardDescription className="flex items-center gap-2 mt-2">
+                  <Calendar className="size-3.5" />
+                  Creado el {fmtDate(order.created_at)}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Método de pago</p>
+                    <p className="mt-1 font-medium text-foreground flex items-center gap-2">
+                      <CreditCard className="size-4 text-primary" />
+                      {order.payment_method ?? 'N/D'}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Total</p>
+                    <p className="mt-1 text-xl font-bold text-foreground">${fmtMoney(order.total)}</p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Estado</p>
+                    <p className="mt-1 font-medium text-foreground capitalize">{order.status}</p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Artículos</p>
+                    <p className="mt-1 font-medium text-foreground">{order.items?.length || 0}</p>
+                  </div>
                 </div>
-              </div>
-              {/* Código QR del pedido */}
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="rounded-2xl border-2 border-white bg-white p-3 shadow-sm">
+
+                <Separator />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-border bg-muted/30 p-4">
+                    <p className="text-sm font-medium flex items-center gap-2 mb-2">
+                      <User className="size-4 text-primary" />
+                      Cliente
+                    </p>
+                    <p className="font-medium text-foreground">{order.customer_name ?? 'N/D'}</p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                      <Phone className="size-3.5" />
+                      {order.customer_phone ?? 'N/D'}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-muted/30 p-4">
+                    <p className="text-sm font-medium flex items-center gap-2 mb-2">
+                      <MapPin className="size-4 text-primary" />
+                      Perfil de facturación
+                    </p>
+                    {billingSnapshot ? (
+                      <div className="space-y-1 text-sm text-foreground">
+                        <p className="font-medium">{billingSnapshot.full_name}</p>
+                        <p className="text-muted-foreground">{billingSnapshot.address_line1}</p>
+                        <p className="text-muted-foreground">RIF: {billingSnapshot.rif}</p>
+                        {billingSnapshot.phone && <p className="text-muted-foreground">Tel: {billingSnapshot.phone}</p>}
+                        {isAdmin && order?.user_id && <p className="text-xs text-muted-foreground mt-2">Usuario ID: {order.user_id}</p>}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No hay datos de facturación disponibles.</p>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <p className="text-sm font-medium flex items-center gap-2 mb-4">
+                    <Package className="size-4 text-primary" />
+                    Artículos
+                  </p>
+                  <div className="space-y-3">
+                    {order.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-[auto_1fr_auto] items-center"
+                      >
+                        <div className="size-12 rounded-xl border border-border bg-muted overflow-hidden shrink-0">
+                          {item.product?.main_image_url_path ? (
+                            <img
+                              src={item.product.main_image_url_path}
+                              alt={item.product.name}
+                              className="size-full object-cover"
+                            />
+                          ) : (
+                            <div className="size-full flex items-center justify-center text-xs font-bold text-muted-foreground">
+                              {item.product?.name?.charAt(0) || '?'}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{item.product?.name ?? 'Producto eliminado'}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Cantidad: {item.quantity} · Precio unitario: ${fmtMoney(item.price)}
+                          </p>
+                          {isAdmin && item.product && (
+                            <p className="text-xs text-muted-foreground">SKU: {item.product.sku ?? 'N/D'}</p>
+                          )}
+                        </div>
+                        <p className="text-right font-semibold text-foreground">${fmtMoney(item.price * item.quantity)}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex items-center justify-between rounded-2xl border border-border bg-muted/40 p-4">
+                    <span className="text-sm text-muted-foreground">Subtotal</span>
+                    <span className="font-semibold text-foreground">${fmtMoney(order.total)}</span>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="rounded-2xl border border-border bg-muted/30 p-4">
+                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+                    <div className="rounded-2xl border border-border bg-background p-3 shadow-sm">
                       <QRCodeSVG
                         value={window.location.href}
                         size={140}
                         level="M"
                         marginSize={0}
-                        fgColor="#1e293b"
+                        fgColor="hsl(var(--foreground))"
+                        bgColor="hsl(var(--background))"
                       />
                     </div>
-                  </div>
-                  <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
-                    <p className="text-sm font-medium">Código QR del pedido</p>
-                    <p className="mt-1 text-sm text-slate-500">Escanea este código QR para acceder directamente al detalle de este pedido desde cualquier dispositivo.</p>
-                    <p className="mt-2 max-w-xs truncate rounded-lg bg-white px-3 py-1.5 text-xs font-mono text-slate-500 border border-slate-200">{window.location.href}</p>
+                    <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
+                      <p className="text-sm font-medium text-foreground">Código QR del pedido</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Escanea este código QR para acceder directamente al detalle de este pedido desde cualquier dispositivo.
+                      </p>
+                      <p className="mt-2 max-w-xs truncate rounded-lg bg-background px-3 py-1.5 text-xs font-mono text-muted-foreground border border-border">
+                        {window.location.href}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-
-            </CardContent>
-          </Card>
+            <div className="flex flex-wrap gap-3 print:hidden">
+              <Button variant="outline" onClick={() => navigate('/shop')}>
+                <Truck className="size-4 mr-2" />
+                Seguir comprando
+              </Button>
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                <RotateCcw className="size-4 mr-2" />
+                Recargar
+              </Button>
+            </div>
+          </>
         )}
       </div>
     </main>

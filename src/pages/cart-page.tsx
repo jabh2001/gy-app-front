@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { showApiError } from '@/api/index'
 import { useCart } from '@/hooks/api/useCart'
 import { useBillingData, useCheckout } from '@/hooks/api'
 import { Button } from '@/components/ui/button'
@@ -54,7 +55,7 @@ export default function CartPage() {
 
       navigate('/profile')
     } catch (errorData) {
-      toast.error('No fue posible finalizar la compra. Intenta de nuevo.')
+      showApiError(errorData, 'No fue posible finalizar la compra')
     }
   }
 

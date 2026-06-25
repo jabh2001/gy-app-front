@@ -56,7 +56,7 @@ function PageHeader() {
                                     </div>
                                     <div className="text-left text-xs">
                                         <p className="text-slate-300">Carrito</p>
-                                        <p className="font-semibold text-white">€ {(cart?.total ?? 0).toFixed(2)}</p>
+                                        <p className="font-semibold text-white">${(cart?.total ?? 0).toFixed(2)}</p>
                                     </div>
                                 </button>
 

@@ -33,7 +33,7 @@ export function ProductListItem({ product }: { product: Product }) {
               {product.name}
             </h4>
             <p className="text-foreground text-2xl font-black tracking-tighter">
-              € {product.price.toFixed(2)}
+              ${product.price.toFixed(2)}
             </p>
             {product.description && (
               <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed max-w-2xl">

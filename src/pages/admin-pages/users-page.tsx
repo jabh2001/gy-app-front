@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import UserForm, { type UserFormData } from "@/components/own/forms/user-form"
+import UserForm from "@/components/own/forms/user-form"
+import { type UserFormData, getRoleLabel } from "@/components/own/forms/user-form.types"
 
 const initialUsers: UserFormData[] = [
-  { id: 1, name: "María López", email: "maria@demo.com", role: "Admin", status: "Activo" },
-  { id: 2, name: "Pedro Ruiz", email: "pedro@demo.com", role: "Vendedor", status: "Activo" },
+  { id: 1, username: "María López", email: "maria@demo.com", role: "admin", status: "Activo" },
+  { id: 2, username: "Pedro Ruiz", email: "pedro@demo.com", role: "seller", status: "Activo" },
 ]
 
 export default function UsersPage() {
@@ -17,10 +18,20 @@ export default function UsersPage() {
     () =>
       users.map((user) => (
         <tr key={user.id} className="border-b border-border/60">
-          <td className="px-4 py-3 text-sm text-foreground">{user.name}</td>
+          <td className="px-4 py-3 text-sm font-medium text-foreground">{user.username}</td>
           <td className="px-4 py-3 text-sm text-muted-foreground">{user.email}</td>
-          <td className="px-4 py-3 text-sm text-foreground">{user.role}</td>
-          <td className="px-4 py-3 text-sm text-muted-foreground">{user.status}</td>
+          <td className="px-4 py-3 text-sm text-foreground">{getRoleLabel(user.role)}</td>
+          <td className="px-4 py-3 text-sm">
+            <span
+              className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                user.status === "Activo"
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                  : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
+              }`}
+            >
+              {user.status}
+            </span>
+          </td>
           <td className="px-4 py-3 text-right">
             <Button
               variant="outline"
@@ -85,7 +96,12 @@ export default function UsersPage() {
       </Card>
 
       {editing ? (
-        <UserForm data={selectedUser} onSave={handleSave} onEdit={handleEdit} />
+        <UserForm
+          key={selectedUser?.id ?? "new"}
+          data={selectedUser}
+          onSave={handleSave}
+          onEdit={handleEdit}
+        />
       ) : null}
     </div>
   )

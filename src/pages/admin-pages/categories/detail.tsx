@@ -6,6 +6,8 @@ import CategoryForm from "@/components/own/forms/category-form"
 import type { Category } from "@/api/models"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { useQueryClient } from "react-query"
+import { showApiError } from "@/api/index"
+import { toast } from "sonner"
 
 
 export default function CategoriesAdminDetail() {
@@ -24,9 +26,10 @@ export default function CategoriesAdminDetail() {
     }
     try {
       await updateCategoryMutation.mutateAsync({ categoryId: Number(id), payload })
+      toast.success('Categoría actualizada correctamente.')
       navigate(-1)
     } catch (error) {
-      console.error(error)
+      showApiError(error, 'No se pudo actualizar la categoría')
     }
   }
 
@@ -40,7 +43,9 @@ export default function CategoriesAdminDetail() {
     try {
       await updateCategoryMutation.mutateAsync({ categoryId, payload })
       qc.invalidateQueries(['category', id])
-    } catch {
+      toast.success('Categoría actualizada correctamente.')
+    } catch (error) {
+      showApiError(error, 'No se pudo actualizar la categoría')
       qc.invalidateQueries(['category', id])
     }
   }

@@ -83,7 +83,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         <Plus size={14} />
                       </button>
                     </div>
-                    <span className="text-sm font-bold text-slate-900">€ {Number(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="text-sm font-bold text-slate-900">${Number(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -99,7 +99,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm text-slate-600">
               <span>Subtotal</span>
-              <span>€ {subtotal.toFixed(2)}</span>
+              <span>${subtotal.toFixed(2)}</span>
             </div>
           </div>
 
@@ -107,7 +107,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <span className="flex items-center justify-between w-full">
               <span className="text-left">
                 <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400 block">{cart?.items.length ?? 0} artículos</span>
-                <span className="text-xl font-black">€ {total.toFixed(2)}</span>
+                <span className="text-xl font-black">${total.toFixed(2)}</span>
               </span>
               <span className="flex items-center gap-1.5 text-sm font-semibold shrink-0">
                 Ver checkout

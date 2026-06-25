@@ -2,11 +2,11 @@ import { useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import UserForm from "@/components/own/forms/user-form"
-import type { UserFormData } from "@/components/own/forms/user-form"
+import type { UserFormData } from "@/components/own/forms/user-form.types"
 
 const mockUsers: UserFormData[] = [
-  { id: 1, name: "María López", email: "maria@demo.com", role: "Admin", status: "Activo" },
-  { id: 2, name: "Pedro Ruiz", email: "pedro@demo.com", role: "Vendedor", status: "Activo" },
+  { id: 1, username: "María López", email: "maria@demo.com", role: "admin", status: "Activo" },
+  { id: 2, username: "Pedro Ruiz", email: "pedro@demo.com", role: "seller", status: "Activo" },
 ]
 
 export default function UsersAdminForm() {
@@ -43,7 +43,13 @@ export default function UsersAdminForm() {
         </Button>
       </div>
 
-      <UserForm data={selectedUser} onSave={handleSave} onEdit={handleEdit} submitLabel="Guardar usuario" />
+      <UserForm
+        key={selectedUser?.id ?? "new"}
+        data={selectedUser}
+        onSave={handleSave}
+        onEdit={handleEdit}
+        submitLabel="Guardar usuario"
+      />
     </div>
   )
 }

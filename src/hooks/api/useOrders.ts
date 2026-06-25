@@ -3,9 +3,9 @@ import api from '@/api'
 import { usePaginatedQuery } from '@/hooks/api/usePaginatedQuery'
 import { useDebounce } from '@/hooks/use-debounce'
 import { usePagination } from '@/hooks/use-pagination'
-import { usePage, useQ } from '@/hooks/api/use-query-params'
+import { usePage, useQ, useStatus } from '@/hooks/api/use-query-params'
 import type { Order } from '@/api/models'
-import type { ListOrdersParams } from '@/api/orders'
+import type { ListOrdersParams, OrderStats, UpdateOrderStatusPayload } from '@/api/orders'
 
 const BASE = '/orders'// Interfaces de payloads y respuestas basadas en tu backend de Flask
 export interface CheckoutPayload {
@@ -24,8 +24,9 @@ export interface CheckoutResponse {
 export function useOrders(params?: ListOrdersParams, options?: any) {
   const [page, setPage] = usePage()
   const [q, setQ] = useQ()
+  const [status, setStatus] = useStatus()
   const debouncedQuery = useDebounce(q, 500)
-  const newParams = { page, q: debouncedQuery, ...params }
+  const newParams = { page, q: debouncedQuery, status, ...params }
 
   const query = usePaginatedQuery<Order>(['orders', newParams], BASE+'/', newParams, options)
   const pagination = usePagination({ page, setPage, items: query.data?.items, meta: query.data?.meta })
@@ -37,6 +38,8 @@ export function useOrders(params?: ListOrdersParams, options?: any) {
       setPage,
       q,
       setQ,
+      status,
+      setStatus,
     },
     pagination,
   }
@@ -73,6 +76,28 @@ export function useCancelOrder() {
   return useMutation((orderId: number) => api.post(`${BASE}/cancel/${orderId}/`), {
     onSuccess: () => {
       queryClient.invalidateQueries('orders')
+      queryClient.invalidateQueries('order')
     },
+  })
+}
+
+export function useUpdateOrderStatus() {
+  const queryClient = useQueryClient()
+  return useMutation(
+    ({ orderId, payload }: { orderId: number; payload: UpdateOrderStatusPayload }) =>
+      api.patch(`${BASE}/${orderId}/status/`, payload),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('orders')
+        queryClient.invalidateQueries('order')
+      },
+    }
+  )
+}
+
+export function useOrdersStats(options?: any) {
+  return useQuery<OrderStats>(['orders-stats'], () => api.get(`${BASE}/stats/`), {
+    staleTime: 1000 * 60 * 2,
+    ...options,
   })
 }

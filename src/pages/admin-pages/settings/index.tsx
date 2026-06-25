@@ -1,14 +1,12 @@
 import { toast } from "sonner"
-import { useNavigate } from "react-router-dom"
+import { showApiError } from "@/api/index"
 import SettingsForm from "@/components/own/forms/settings-form"
 import { useSettings, useUpdateSettings } from "@/hooks/api"
 import type { SiteSettings } from "@/api/models"
-import type { SettingsFormData } from "@/components/own/forms/settings-form"
 import useTitle from "@/hooks/use-title"
 
 export default function SettingsAdminIndex() {
   useTitle("Editar ajustes - Panel de administración")
-  const navigate = useNavigate()
   const { data: settings, isLoading } = useSettings()
   const updateSettings = useUpdateSettings()
 
@@ -17,7 +15,7 @@ export default function SettingsAdminIndex() {
       await updateSettings.mutateAsync(payload)
       toast.success('Ajustes guardados correctamente.')
     } catch (error) {
-      toast.error('No se pudieron guardar los ajustes. Intenta de nuevo.')
+      showApiError(error, 'No se pudieron guardar los ajustes')
     }
   }
 
@@ -56,6 +54,7 @@ export default function SettingsAdminIndex() {
       </div>
 
       <SettingsForm
+        key="settings"
         data={mapToFormData(settings)}
         onSave={handleSave}
         onEdit={handleSave}

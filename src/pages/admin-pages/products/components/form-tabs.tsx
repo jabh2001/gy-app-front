@@ -7,6 +7,8 @@ import FlowbiteTabs from "@/components/own/flowbite-tabs";
 import CategoryManager from "./category-manager"
 import { useQueryClient } from "react-query"
 import ImageManager from "./image-manager"
+import { showApiError } from "@/api/index";
+import { toast } from "sonner";
 
 export default function FormTabs({ product }: { product: Product }) {
     return (
@@ -52,9 +54,10 @@ function EditForm({ product }: { product: Product }) {
 
         try {
             await updateProductMutation.mutateAsync({ productId: Number(id), payload })
+            toast.success('Producto actualizado correctamente.')
             navigate(-1)
         } catch (error) {
-            console.error(error)
+            showApiError(error, 'No se pudo actualizar el producto')
         }
     }
 
@@ -66,15 +69,20 @@ function EditForm({ product }: { product: Product }) {
             return { ...old, ...payload }
         })
         try {
-            await updateProductMutation.mutateAsync({ productId: numericId, payload: payload as any })
+            await updateProductMutation.mutateAsync({ productId: numericId, payload: payload as Partial<Product> })
             qc.invalidateQueries(['product', numericId])
-        } catch {
+            toast.success('Producto actualizado correctamente.')
+        } catch (error) {
+            showApiError(error, 'No se pudo actualizar el producto')
             qc.invalidateQueries(['product', numericId])
         }
     }
 
+    const mappedProduct = mapProductToFormData(product)
+
     return <ProductForm
-        data={mapProductToFormData(product)}
+        key={mappedProduct.id}
+        data={mappedProduct}
         onEdit={handleEdit}
         onToggleSave={handleToggleSave}
         submitLabel={"Guardar producto"}
@@ -97,6 +105,7 @@ function mapProductToFormData(product: Product): ProductFormData {
         is_active: product.is_active,
         description: product.description ?? "",
         images: [],
+        existingImages: product.images ? product.images.map((img) => img.url) : [],
         main_image_index: 0,
     }
 }

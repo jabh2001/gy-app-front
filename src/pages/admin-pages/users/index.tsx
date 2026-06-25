@@ -24,7 +24,7 @@ export default function UsersAdminIndex() {
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-3 border border-border/70 bg-gray-200 p-3 shadow-sm lg:grid-cols-[auto_1fr_auto] md:items-center">
+      <section className="grid gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm lg:grid-cols-[auto_1fr_auto] md:items-center">
         <div className="order-1 w-full flex flex-wrap gap-2 justify-end">
           <Button className="h-11 rounded-2xl" onClick={() => navigate("/admin/users/create")}>
             <Grip />

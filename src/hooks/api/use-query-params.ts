@@ -7,6 +7,10 @@ export function usePage() {
   return useQueryState("page", parseAsInteger.withDefault(1))
 }
 
+export function useStatus() {
+  return useQueryState("status", { defaultValue: "" })
+}
+
 export function useOrder({ defaultValue = "name_asc" } :{ defaultValue?: string }={}) {
   return useQueryState("order", { defaultValue })
 }

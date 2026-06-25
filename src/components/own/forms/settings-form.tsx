@@ -1,10 +1,9 @@
-import { useEffect, useState, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { FileUpload, FileUploadTrigger } from "@/components/ui/file-upload"
 import { ImagePlus, X } from "lucide-react"
 import SocialMediaIcon, { SOCIAL_PLATFORMS } from "../SocialMediaIcon"
 
@@ -30,6 +29,22 @@ interface SettingsFormProps {
   isSaving?: boolean
 }
 
+const emptySettingsState: SettingsFormData = {
+  site_name: "Mi Ecommerce",
+  site_description: "",
+  logo_url: "",
+  contact_email: "",
+  floating_whatsapp: "",
+  order_whatsapp: "",
+  category_max_children: "",
+  category_max_depth: "",
+  hero_images: [],
+  footer_links: [],
+  social_links: [],
+}
+
+const MAX_HERO_IMAGES = 6
+
 /* ─── ícono WhatsApp inline ─── */
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -42,7 +57,6 @@ function WhatsAppIcon({ className }: { className?: string }) {
 /* ─── Preview de imagen con fallback ─── */
 function ImagePreview({ url, alt, size = "md" }: { url: string; alt: string; size?: "sm" | "md" | "lg" }) {
   const [error, setError] = useState(false)
-  useEffect(() => { setError(false) }, [url])
 
   const sizeClasses = {
     sm: "h-16 w-16",
@@ -52,8 +66,8 @@ function ImagePreview({ url, alt, size = "md" }: { url: string; alt: string; siz
 
   if (!url || error) {
     return (
-      <div className={`${sizeClasses[size]} rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center`}>
-        <svg className="size-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className={`${sizeClasses[size]} rounded-xl border-2 border-dashed border-border bg-muted/50 flex items-center justify-center`}>
+        <svg className="size-6 text-muted-foreground/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
         </svg>
       </div>
@@ -62,30 +76,34 @@ function ImagePreview({ url, alt, size = "md" }: { url: string; alt: string; siz
 
   return (
     <img
+      key={url}
       src={url}
       alt={alt}
-      className={`${sizeClasses[size]} rounded-xl border border-slate-200 object-cover`}
+      className={`${sizeClasses[size]} rounded-xl border border-border object-cover`}
+      onLoad={() => setError(false)}
       onError={() => setError(true)}
     />
   )
 }
 
-const ImageItem = ({ src, alt, onclickRemove }: { src: string; alt: string; onclickRemove: () => void }) => (
+const HeroImageItem = ({ src, alt, onclickRemove, readonly }: { src: string; alt: string; onclickRemove: () => void; readonly?: boolean }) => (
   <div className="h-40 w-40 relative aspect-square">
     <img
       src={src}
       alt={alt}
-      className="h-full w-full rounded-lg object-cover border border-slate-200"
+      className="h-full w-full rounded-lg object-cover border border-border"
     />
-    <Button
-      type="button"
-      variant="destructive"
-      size="icon"
-      className="absolute top-1 right-1 size-6 opacity-80 hover:opacity-100"
-      onClick={onclickRemove}
-    >
-      <X className="size-3" />
-    </Button>
+    {!readonly && (
+      <Button
+        type="button"
+        variant="destructive"
+        size="icon"
+        className="absolute top-1 right-1 size-6 opacity-80 hover:opacity-100"
+        onClick={onclickRemove}
+      >
+        <X className="size-3" />
+      </Button>
+    )}
   </div>
 )
 
@@ -97,10 +115,10 @@ function SettingsSection({ title, description, icon, children }: {
   children: React.ReactNode
 }) {
   return (
-    <Card className="border-slate-200/80 shadow-sm">
+    <Card className="border-border shadow-sm">
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 text-slate-600">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-muted to-muted/50 text-foreground/60">
             {icon}
           </div>
           <div>
@@ -115,29 +133,23 @@ function SettingsSection({ title, description, icon, children }: {
 }
 
 export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guardar ajustes", isSaving }: SettingsFormProps) {
-  const [formState, setFormState] = useState<SettingsFormData>({
-    site_name: "Mi Ecommerce",
-    site_description: "",
-    logo_url: "",
-    contact_email: "",
-    floating_whatsapp: "",
-    order_whatsapp: "",
-    category_max_children: "",
-    category_max_depth: "",
-    hero_images: [],
-    footer_links: [],
-    social_links: [],
-  })
-
-  // Estado para nuevos archivos de imágenes
+  const [formState, setFormState] = useState<SettingsFormData>(() =>
+    data ? { ...emptySettingsState, ...data } : emptySettingsState
+  )
   const [newHeroImages, setNewHeroImages] = useState<File[]>([])
+  const [newHeroPreviews, setNewHeroPreviews] = useState<string[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const previewsRef = useRef<string[]>([])
 
   useEffect(() => {
-    if (data) {
-      setFormState(data)
-      setNewHeroImages([]) // Resetear archivos nuevos al cargar data
+    previewsRef.current = newHeroPreviews
+  }, [newHeroPreviews])
+
+  useEffect(() => {
+    return () => {
+      previewsRef.current.forEach((url) => URL.revokeObjectURL(url))
     }
-  }, [data])
+  }, [])
 
   const handleChange = (key: keyof SettingsFormData, value: string | number) => {
     setFormState((prev) => ({ ...prev, [key]: value }))
@@ -172,7 +184,6 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
         formData.append('hero_images', image)
       })
     } else if (!formState.hero_images || formState.hero_images.length === 0) {
-      // Evitar que falle si enviamos vacío y no pasamos existing
       formData.append('existing_hero_images', '')
     }
 
@@ -183,15 +194,30 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
     const payload = buildFormData()
     if (data) {
       onEdit(payload)
-      return
+    } else {
+      onSave(payload)
     }
-    onSave(payload)
   }
 
-  /* ─── Hero images helpers ─── */
-  const handleNewImagesChange = useCallback((images: File[]) => {
-    setNewHeroImages(images)
-  }, [])
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    const newFiles = Array.from(files)
+    const currentTotal = (formState.hero_images?.length ?? 0) + newHeroImages.length
+    const remainingSlots = MAX_HERO_IMAGES - currentTotal
+    if (remainingSlots <= 0) {
+      event.target.value = ""
+      return
+    }
+
+    const filesToAdd = newFiles.slice(0, remainingSlots)
+    const previews = filesToAdd.map((file) => URL.createObjectURL(file))
+
+    setNewHeroImages((prev) => [...prev, ...filesToAdd])
+    setNewHeroPreviews((prev) => [...prev, ...previews])
+    event.target.value = ""
+  }, [formState.hero_images?.length, newHeroImages.length])
 
   const removeExistingHeroImage = (idx: number) => {
     setFormState((prev) => ({
@@ -201,8 +227,14 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
   }
 
   const removeNewHeroImage = (idx: number) => {
-    setNewHeroImages(prev => prev.filter((_, i) => i !== idx))
+    const preview = newHeroPreviews[idx]
+    if (preview) URL.revokeObjectURL(preview)
+
+    setNewHeroImages((prev) => prev.filter((_, i) => i !== idx))
+    setNewHeroPreviews((prev) => prev.filter((_, i) => i !== idx))
   }
+
+  const totalHeroImages = (formState.hero_images?.length ?? 0) + newHeroImages.length
 
   /* ─── Social links helpers ─── */
   const socialLinks = formState.social_links ?? []
@@ -282,7 +314,7 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
   return (
     <div className="space-y-6">
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="w-full flex-wrap h-auto gap-1 bg-slate-100/80 p-1 rounded-xl">
+        <TabsList className="w-full flex-wrap h-auto gap-1 bg-muted p-1 rounded-xl">
           <TabsTrigger value="general" className="gap-1.5 rounded-lg text-xs sm:text-sm">
             {icons.general} General
           </TabsTrigger>
@@ -373,51 +405,58 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
 
             {/* Hero Images */}
             <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium">Imágenes del Hero (Banner)</p>
-                <p className="text-xs text-muted-foreground mb-4">Sube las imágenes que se mostrarán en el carrusel principal de la tienda. Puedes subir múltiples imágenes.</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Imágenes del Hero (Banner)</p>
+                  <p className="text-xs text-muted-foreground">Sube las imágenes que se mostrarán en el carrusel principal de la tienda.</p>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {totalHeroImages} / {MAX_HERO_IMAGES}
+                </span>
               </div>
 
-              <FileUpload
-                maxFiles={6}
-                accept="image/*"
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
                 multiple
-                value={newHeroImages}
-                onValueChange={handleNewImagesChange}
-                onClick={(event) => { event.stopPropagation() }}
-              >
-                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                  {/* Imágenes existentes (URLs) */}
-                  {formState.hero_images?.map((url, idx) => (
-                    <ImageItem
-                      key={`existing-${idx}`}
-                      src={url}
-                      alt={`Hero ${idx + 1}`}
-                      onclickRemove={() => removeExistingHeroImage(idx)}
-                    />
-                  ))}
+                className="hidden"
+                onChange={handleFileSelect}
+              />
 
-                  {/* Imágenes nuevas (Files) */}
-                  {newHeroImages.map((file, idx) => (
-                    <ImageItem
-                      key={`new-${idx}`}
-                      src={URL.createObjectURL(file)}
-                      alt={file.name}
-                      onclickRemove={() => removeNewHeroImage(idx)}
-                    />
-                  ))}
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                {/* Imágenes existentes (URLs) */}
+                {formState.hero_images?.map((url, idx) => (
+                  <HeroImageItem
+                    key={`existing-${idx}`}
+                    src={url}
+                    alt={`Hero ${idx + 1}`}
+                    onclickRemove={() => removeExistingHeroImage(idx)}
+                  />
+                ))}
 
-                  {/* Botón de upload */}
-                  {((formState.hero_images?.length ?? 0) + newHeroImages.length) < 6 && (
-                    <FileUploadTrigger asChild>
-                      <button className="h-40 w-40 flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-slate-300 transition-colors hover:border-slate-400 hover:bg-slate-50">
-                        <ImagePlus className="size-6 text-slate-400" />
-                        <span className="text-xs text-slate-500 font-medium">Agregar</span>
-                      </button>
-                    </FileUploadTrigger>
-                  )}
-                </div>
-              </FileUpload>
+                {/* Imágenes nuevas (Files) */}
+                {newHeroImages.map((file, idx) => (
+                  <HeroImageItem
+                    key={`new-${file.name}-${idx}`}
+                    src={newHeroPreviews[idx]}
+                    alt={file.name}
+                    onclickRemove={() => removeNewHeroImage(idx)}
+                  />
+                ))}
+
+                {/* Botón de upload */}
+                {totalHeroImages < MAX_HERO_IMAGES && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-40 w-40 flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border transition-colors hover:border-primary/50 hover:bg-muted/50"
+                  >
+                    <ImagePlus className="size-6 text-muted-foreground/50" />
+                    <span className="text-xs text-muted-foreground font-medium">Agregar</span>
+                  </button>
+                )}
+              </div>
             </div>
           </SettingsSection>
         </TabsContent>
@@ -449,9 +488,9 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
-              <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+              <div className="space-y-3 rounded-xl border border-border bg-card p-4">
                 <div className="flex items-center gap-2">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-green-100 text-green-600">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
                     <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
                     </svg>
@@ -472,9 +511,9 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
                 </label>
               </div>
 
-              <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+              <div className="space-y-3 rounded-xl border border-border bg-card p-4">
                 <div className="flex items-center gap-2">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-green-900/30 dark:text-emerald-400">
                     <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                     </svg>
@@ -516,18 +555,18 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
             </div>
 
             {socialLinks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 text-center">
-                <svg className="size-8 text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 text-center">
+                <svg className="size-8 text-muted-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
                 </svg>
-                <p className="text-sm text-slate-500">No tienes redes sociales configuradas.</p>
-                <p className="text-xs text-slate-400">Haz clic en "Agregar red social" para comenzar.</p>
+                <p className="text-sm text-muted-foreground">No tienes redes sociales configuradas.</p>
+                <p className="text-xs text-muted-foreground/70">Haz clic en "Agregar red social" para comenzar.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {socialLinks.map((link, idx) => (
-                  <div key={idx} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 transition-shadow hover:shadow-sm">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-slate-50 border border-slate-100">
+                  <div key={idx} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 transition-shadow hover:shadow-sm">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted border border-border">
                       <SocialMediaIcon platform={link.platform || 'default'} className="size-5" />
                     </div>
                     <div className="grid flex-1 gap-2 sm:grid-cols-2">
@@ -585,18 +624,18 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
             </div>
 
             {footerLinks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 text-center">
-                <svg className="size-8 text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/30 p-8 text-center">
+                <svg className="size-8 text-muted-foreground/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                 </svg>
-                <p className="text-sm text-slate-500">No hay enlaces del footer configurados.</p>
-                <p className="text-xs text-slate-400">Haz clic en "Agregar enlace" para comenzar.</p>
+                <p className="text-sm text-muted-foreground">No hay enlaces del footer configurados.</p>
+                <p className="text-xs text-muted-foreground/70">Haz clic en "Agregar enlace" para comenzar.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {footerLinks.map((link, idx) => (
-                  <div key={idx} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 transition-shadow hover:shadow-sm">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                  <div key={idx} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 transition-shadow hover:shadow-sm">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                       <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                       </svg>
@@ -684,7 +723,7 @@ export default function SettingsForm({ data, onSave, onEdit, submitLabel = "Guar
       </Tabs>
 
       {/* ─── Botón de guardar fijo ─── */}
-      <div className="flex items-center justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-end gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
         <p className="text-xs text-muted-foreground mr-auto">Los cambios no se guardan automáticamente.</p>
         <Button
           onClick={handleSubmit}

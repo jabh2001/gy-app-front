@@ -1,1 +1,0 @@
-import{o as t,p as n,q as i,s as u}from"./index-CDzI2atB.js";async function a(){return t.get("/settings/")}const o="/settings/";function c(){return n(["settings"],a)}function g(){const s=i();return u(e=>t.post(o+"/",e),{onSuccess:()=>s.invalidateQueries("settings")})}export{g as a,c as u};

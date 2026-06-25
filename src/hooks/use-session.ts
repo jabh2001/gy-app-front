@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { login as loginRequest, logout as logoutRequest, register as registerRequest, profile as profileRequest, updateProfile as updateProfileRequest, type AuthLoginPayload, type AuthRegisterPayload } from '@/api/auth';
-import { normalizeApiError } from '@/api/index';
+import { login as loginRequest, logout as logoutRequest, register as registerRequest, profile as profileRequest, updateProfile as updateProfileRequest, clearSession as clearSessionRequest, type AuthLoginPayload, type AuthRegisterPayload } from '@/api/auth';
+import { normalizeApiError, showApiError } from '@/api/index';
 import type { User } from '@/api/models';
 
 const SESSION_STORAGE_KEY = 'gy_app_user_session';
@@ -17,10 +17,17 @@ export interface SessionState {
   login: (payload: AuthLoginPayload) => Promise<User>;
   register: (payload: AuthRegisterPayload) => Promise<User>;
   logout: () => Promise<void>;
+  forceClearSession: () => Promise<void>;
   updateProfile: (payload: Partial<Pick<User, 'email' | 'username'>> & { password?: string }) => Promise<User>;
   isAuthenticated: () => boolean;
   hasRole: (role: User['role']) => boolean;
   hasAnyRole: (roles: User['role'][]) => boolean;
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('session-expired', () => {
+    useSession.getState().forceClearSession();
+  });
 }
 
 export const useSession = create<SessionState>()(
@@ -32,11 +39,15 @@ export const useSession = create<SessionState>()(
       hasCheckedSession: false,
 
       checkSession: async () => {
+        if (!get().user) {
+          set({ hasCheckedSession: true, status: 'unauthenticated', user: null });
+          return null;
+        }
+
         set({ status: 'loading', error: undefined });
 
         try {
           const user = await profileRequest();
-
           set({
             user,
             status: 'authenticated',
@@ -116,6 +127,17 @@ export const useSession = create<SessionState>()(
           const apiError = normalizeApiError(errorData);
           set({ error: apiError.message, status: 'error' });
           throw apiError;
+        }
+      },
+
+      forceClearSession: async () => {
+        try {
+          await clearSessionRequest();
+        } catch {
+        }
+        set({ user: null, status: 'unauthenticated', hasCheckedSession: true, error: undefined });
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('cart-refetch'));
         }
       },
 

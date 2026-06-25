@@ -44,6 +44,14 @@ export async function logout(): Promise<{ msg: string }> {
   return api.post('/auth/logout/');
 }
 
+export async function refreshToken(): Promise<{ msg: string }> {
+  return api.post('/auth/refresh/');
+}
+
+export async function clearSession(): Promise<{ msg: string }> {
+  return api.post('/auth/clear-session/');
+}
+
 export async function updateProfile(payload: Partial<Pick<User, 'email' | 'username'>> & { password?: string }): Promise<User> {
   return api.put('/auth/profile/', payload);
 }

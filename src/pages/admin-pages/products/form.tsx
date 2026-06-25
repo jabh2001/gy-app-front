@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
+import { showApiError } from "@/api/index"
 import { Button } from "@/components/ui/button"
 import ProductForm, { type ProductFormData } from "@/components/own/forms/product-form"
 import { useCreateProduct, useProductDetail, useUpdateProduct } from "@/hooks/api/useProducts"
@@ -20,9 +21,8 @@ function mapProductToFormData(product: Product): ProductFormData {
     is_on_sale: product.is_on_sale,
     is_active: product.is_active,
     description: product.description ?? "",
-    images: product.images ? product.images.map((img) => {
-      return new File([], img.url)
-    }) : [],
+    images: [],
+    existingImages: product.images ? product.images.map((img) => img.url) : [],
     main_image_index: 0,
   }
 }
@@ -39,7 +39,7 @@ export default function ProductsAdminForm() {
     if (productDetail) {
       return mapProductToFormData(productDetail)
     }
-  }, [id, productDetail])
+  }, [productDetail])
 
   const handleSave = async (payload: FormData) => {
     try {
@@ -47,7 +47,7 @@ export default function ProductsAdminForm() {
       toast.success('Producto creado correctamente.')
       navigate(-1)
     } catch (error) {
-      toast.error('No se pudo crear el producto.')
+      showApiError(error, 'No se pudo crear el producto')
     }
   }
 
@@ -62,7 +62,7 @@ export default function ProductsAdminForm() {
       toast.success('Producto actualizado correctamente.')
       navigate(-1)
     } catch (error) {
-      toast.error('No se pudo actualizar el producto.')
+      showApiError(error, 'No se pudo actualizar el producto')
     }
   }
 
@@ -83,6 +83,7 @@ export default function ProductsAdminForm() {
       </div>
 
       <ProductForm
+        key={selectedProduct?.id ?? "new"}
         data={selectedProduct}
         onSave={handleSave}
         onEdit={handleEdit}

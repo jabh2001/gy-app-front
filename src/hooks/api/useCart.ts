@@ -52,6 +52,7 @@ export function useCart() {
   const cartQuery = useQuery<CartData>(['cart', sessionId], () => getCartApi(sessionId), {
     staleTime: 1000 * 60,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 
   const addMutation = useMutation((payload: { product_id: number; quantity: number }) => addToCartApi({ ...payload, session_id: sessionId }), {

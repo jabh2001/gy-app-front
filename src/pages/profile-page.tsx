@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { showApiError } from '@/api/index'
 import useTitle from '@/hooks/use-title'
 import { useSession } from '@/hooks/use-session'
 import { useBillingData, useCreateBillingData, useUpdateBillingData, useDeleteBillingData } from '@/hooks/api'
@@ -82,7 +83,7 @@ export default function ProfilePage() {
       setProfileForm((prev) => ({ ...prev, password: '' }))
       toast.success('Perfil actualizado correctamente.')
     } catch (errorData) {
-      toast.error('No se pudo actualizar el perfil.')
+      showApiError(errorData, 'No se pudo actualizar el perfil')
     }
   }
 
@@ -107,7 +108,7 @@ export default function ProfilePage() {
       setSelectedBillingId(null)
       setBillingForm(initialBillingForm)
     } catch (errorData) {
-      toast.error('No se pudo guardar el perfil de facturación.')
+      showApiError(errorData, 'No se pudo guardar el perfil de facturación')
     }
   }
 
@@ -120,7 +121,7 @@ export default function ProfilePage() {
       }
       toast.success('Perfil de facturación eliminado.')
     } catch (errorData) {
-      toast.error('No se pudo eliminar el perfil de facturación.')
+      showApiError(errorData, 'No se pudo eliminar el perfil de facturación')
     }
   }
 

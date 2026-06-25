@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink } from 'react-router-dom';
 import { BottomBarMobile } from '@/components/own/layouts/ui/bottom-bar-mobile';
 import { PageHeader } from '@/components/own/layouts/ui/page-header';
 import { AdminFloatingButton } from '@/components/own/admin-floating-button';
@@ -13,20 +13,16 @@ import { useSettings } from '@/hooks/api';
 
 
 export default function MainLayout() {
-    const hasCheckedSession = useSession((state) => state.hasCheckedSession);
     const checkSession = useSession((state) => state.checkSession);
-    const user = useSession((state) => state.user);
-    const navigate = useNavigate()
     const title = useTitleStore((state) => state.title)
     const { data: settings } = useSettings()
     const siteName = settings?.site_name || 'Tienda'
 
     useEffect(() => {
-        hasCheckedSession && !user && navigate("/login")
-    }, [user])
-
-    useEffect(() => {
-        checkSession();
+        const timer = setTimeout(() => {
+            checkSession();
+        }, 0);
+        return () => clearTimeout(timer);
     }, [checkSession]);
 
     useEffect(() => {

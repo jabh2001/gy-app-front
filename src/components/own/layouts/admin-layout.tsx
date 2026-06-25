@@ -78,7 +78,10 @@ export default function AdminLayout() {
     hasCheckedSession && !user && navigate("/login")
   }, [user])
   useEffect(() => {
-    checkSession();
+    const timer = setTimeout(() => {
+      checkSession();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [checkSession]);
 
   // if (!hasCheckedSession) return null;
@@ -125,32 +128,34 @@ function AdminSidebar() {
       side="left"
       variant="inset"
       collapsible="offcanvas"
-      className="border-r"
-      
+      className="border-r isolate"
     >
-      <SidebarHeader className="border-b px-3 py-4">
+      <div aria-hidden className="absolute dark:brightness-50 hue-rotate-180 inset-0 z-0 bg-[url(/side-bg.jpg)] bg-cover bg-center" />
+      <div aria-hidden className="absolute inset-0 z-[1] bg-sky-200/30" />
+
+      <SidebarHeader className="relative z-10 border-b border-white/10 px-3 py-4 backdrop-blur-sm">
         <div className="flex items-center gap-3 rounded-xl px-2 py-2">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Store className="h-5 w-5" />
           </div>
 
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold leading-none">
+            <p className="truncate text-sm font-semibold leading-none text-white">
               Tienda Admin
             </p>
-            <p className="mt-1 truncate text-xs text-muted-foreground">
+            <p className="mt-1 truncate text-xs text-white/60">
               Panel interno
             </p>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="relative z-10">
         <SidebarGroup>
-          <SidebarGroupLabel>Navegación</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/80">Navegación</SidebarGroupLabel>
 
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="px-1 space-y-2">
               {navItems.map((item) => (
                 <AdminSidebarItem key={item.path} item={item} />
               ))}
@@ -159,10 +164,10 @@ function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-3">
-        <div className="rounded-xl bg-muted px-3 py-3">
-          <p className="text-sm font-medium">Administración</p>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+      <SidebarFooter className="relative z-10 border-t border-white/10 p-3">
+        <div className="rounded-xl bg-white/40 dark:bg-black/50 px-3 py-3 backdrop-blur-sm">
+          <p className="text-sm font-medium text-foreground">Administración</p>
+          <p className="mt-1 text-xs leading-5 text-foreground/60">
             Acceso para gestionar la tienda.
           </p>
         </div>
@@ -200,9 +205,11 @@ function AdminSidebarItem({
         tooltip={item.label}
         variant={"outline"}
         className={cn(
-          "h-10 cursor-pointer rounded text-black",
-          "data-[active=true]:bg-primary data-[active=true]:text-primary-foreground",
-          "data-[active=true]:hover:bg-primary data-[active=true]:hover:text-primary-foreground"
+          "h-10 cursor-pointer rounded bg-white/10 text-white/80",
+          "hover:bg-white/20 hover:text-white",
+          "data-[active=false]:bg-primary/20 data-[active=false]:text-white",
+          "data-[active=false]:hover:bg-primary/40 data-[active=false]:hover:text-white",
+          "data-[active=true]:bg-primary/50 data-[active=true]:text-white",
         )}
       >
         <NavLink
