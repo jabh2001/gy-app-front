@@ -10,6 +10,7 @@
   --popover: rgb(255, 255, 255);
   --popover-foreground: rgb(14, 20, 43);
   --primary: rgb(46, 103, 255);
+  --primary: rgb(17, 17, 113);
   --primary-foreground: rgb(255, 255, 255);
   --secondary: rgb(14, 20, 43);
   --secondary-foreground: rgb(255, 255, 255);
@@ -29,10 +30,10 @@
   --chart-5: rgb(255, 40, 34);
   --sidebar: rgb(250, 250, 250);
   --sidebar-foreground: rgb(14, 20, 43);
-  --sidebar-primary: rgb(46, 103, 255);
+  --sidebar-primary: rgb(47, 47, 143);
   --sidebar-primary-foreground: rgb(255, 255, 255);
   --sidebar-accent: rgb(255, 255, 255);
-  --sidebar-accent-foreground: rgb(46, 103, 255);
+  --sidebar-accent-foreground: rgb(51, 98, 228);
   --sidebar-border: rgb(255, 255, 255);
   --sidebar-ring: rgb(46, 106, 255);
   --radius: 1.3rem;
@@ -61,7 +62,7 @@
   --card-foreground: rgb(217, 217, 217);
   --popover: rgb(0, 0, 0);
   --popover-foreground: rgb(255, 255, 255);
-  --primary: rgb(43, 101, 255);
+  --primary: rgb(47, 47, 143);
   --primary-foreground: rgb(255, 255, 255);
   --secondary: rgb(255, 255, 255);
   --secondary-foreground: rgb(14, 20, 43);
@@ -81,7 +82,7 @@
   --chart-5: rgb(255, 40, 34);
   --sidebar: rgb(15, 15, 15);
   --sidebar-foreground: rgb(217, 217, 217);
-  --sidebar-primary: rgb(46, 106, 255);
+  --sidebar-primary: rgb(47, 47, 143);
   --sidebar-primary-foreground: rgb(255, 255, 255);
   --sidebar-accent: rgb(0, 14, 57);
   --sidebar-accent-foreground: rgb(43, 101, 255);

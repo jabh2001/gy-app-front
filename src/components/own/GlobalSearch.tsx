@@ -5,7 +5,10 @@ import { Input } from "@/components/ui/input"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useSearchSuggestions } from "@/hooks/api/useSearch"
 
-export default function GlobalSearch() {
+type Props = {
+    category?: boolean
+}
+export default function GlobalSearch({ category=true }: Props) {
     const [searchTerm, setSearchTerm] = useState("")
     const searchTermTrim = useMemo(() => searchTerm.trim(), [searchTerm])
     const [isOpen, setIsOpen] = useState(false)
@@ -105,12 +108,12 @@ export default function GlobalSearch() {
 
             {/* Menú Desplegable (Dropdown) */}
             {isOpen && searchTermTrim.length >= 2 && (
-                <div className={`${showXL && 'w-[150%]'} absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-xl z-50 overflow-hidden max-h-[400px] overflow-y-auto bg-white text-slate-900`}>
+                <div className={`${showXL && 'w-full lg:w-[150%]'} absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-xl z-50 overflow-hidden max-h-[400px] overflow-y-auto bg-white text-slate-900`}>
 
                     {showLoader ? <SearchLoaderHeader /> : showData ? (
                         <div className={`${showXL && 'grid grid-cols-[1fr_2fr]'} py-2`}>
                             {/* SECCIÓN DE CATEGORÍAS */}
-                            {showCategories && (
+                            {category && showCategories && (
                                 <div className="mb-2">
                                     <span className="block px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">
                                         Categorías sugeridas

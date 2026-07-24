@@ -17,7 +17,7 @@ export default function CategoryManager({ product }: { product: Product }) {
   const { data: allCategories = [] } = useQuery<Category[]>(
     ["all-categories"],
     async () => {
-      const result = await api.get("/categories/", { params: { page_size: 100 } })
+      const result = await api.get("/categories/", { params: { page_size: 100 } }) as any
       return result?.items || result || []
     },
     { staleTime: 60000 }

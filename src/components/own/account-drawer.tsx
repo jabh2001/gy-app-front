@@ -33,7 +33,7 @@ interface AccountDrawerProps {
 export function AccountDrawer({
   isOpen,
   onClose,
-  cartCount = 1,
+  cartCount,
   profilePath,
   logoutPath,
   loginPath,
