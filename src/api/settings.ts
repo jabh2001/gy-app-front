@@ -16,6 +16,6 @@ export async function uploadSettingsImage(file: File): Promise<string> {
   formData.append('file', file);
   const result = await api.post('/settings/upload-image/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  }) as any;
   return result.url;
 }

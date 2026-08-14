@@ -4,11 +4,15 @@ import { Search, X, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useSearchSuggestions } from "@/hooks/api/useSearch"
+import { MultiHostImage } from "@/components/own/multi-host-image"
 
 type Props = {
     category?: boolean
+    showCategoryList?: boolean
+    showProductList?: boolean
+    onSearchSubmit?: (searchTerm: string) => void
 }
-export default function GlobalSearch({ category=true }: Props) {
+export default function GlobalSearch({ category=true, showCategoryList=true, showProductList=true, onSearchSubmit }: Props) {
     const [searchTerm, setSearchTerm] = useState("")
     const searchTermTrim = useMemo(() => searchTerm.trim(), [searchTerm])
     const [isOpen, setIsOpen] = useState(false)
@@ -48,6 +52,7 @@ export default function GlobalSearch({ category=true }: Props) {
     }
 
     const handleClear = () => {
+        onSearchSubmit?.(searchTermTrim)
         setSearchTerm("")
         setIsOpen(false)
     }
@@ -74,8 +79,8 @@ export default function GlobalSearch({ category=true }: Props) {
 
     // Condición real de carga: o está escribiendo, o react-query está trayendo los datos
     const showLoader = isSearching || isLoading || isFetching
-    const showProducts = data && data.products.length > 0
-    const showCategories = data && data.categories.length > 0
+    const showProducts = showProductList && data && data.products.length > 0
+    const showCategories = showCategoryList && data && data.categories.length > 0
     const showData = showProducts || showCategories
     const showXL = showProducts && showCategories
 
@@ -148,7 +153,12 @@ export default function GlobalSearch({ category=true }: Props) {
                                                 >
                                                     <div className="bg-slate-100 p-1 rounded-md size-10 flex items-center justify-center overflow-hidden border">
                                                         {item.main_image ? (
-                                                            <img src={item.main_image_url_path ?? ""} alt="" className="object-cover size-full" />
+                                                            
+                                                            <MultiHostImage
+                                                                path={item.main_image ?? ""}
+                                                                alt={`Imagen de ${item.name}`}
+                                                                className="object-cover size-full"
+                                                            />
                                                         ) : (
                                                             <Search className="size-4 text-slate-400" />
                                                         )}

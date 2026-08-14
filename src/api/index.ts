@@ -2,8 +2,15 @@ import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestCo
 import { toast } from 'sonner';
 import { createElement } from 'react';
 
-export const baseURL = 'http://127.0.0.1:5000/api';
-// export const baseURL = '/api';
+// Lista de hostings donde se intentará buscar la imagen (en orden de prioridad)
+export const STATIC_DEFAULT_HOSTS = [
+  "/",
+  "",
+];
+
+// export const baseURL = 'http://127.0.0.1:5000/api';
+// export const baseURL = 'http://192.168.1.3:5000/api';
+export const baseURL = '/api';
 
 const api = axios.create({
   baseURL,
@@ -86,6 +93,7 @@ function flattenErrors(errors: unknown): string[] {
   }
 
   if (Array.isArray(errors)) {
+    console.log({errors})
     errors.forEach((item) => result.push(...flattenErrors(item)));
     return result;
   }

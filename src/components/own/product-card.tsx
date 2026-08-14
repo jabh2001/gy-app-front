@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useCart } from '@/hooks/api/useCart';
+import { MultiHostImage } from "@/components/own/multi-host-image"
+import { showApiError } from "@/api";
 
 type Props = {
   product: Product
@@ -14,6 +16,7 @@ interface Product {
   id: number;
   name: string;
   price: number;
+  sale_price?: number | null;
   image?: string;
 }
 
@@ -28,8 +31,14 @@ export function ProductCard({ product, onClickAddToCart, to }: Props) {
       onClickAddToCart(product);
       return;
     }
-
-    await addToCart(product.id, 1);
+    try {
+      await addToCart(product.id, 1);
+    } catch (error) {
+      console.error('Error al agregar al carrito:', error);
+      toast.error('No fue posible agregar el producto al carrito');
+      showApiError(error, 'No fue posible agregar el producto al carrito');
+      return;
+    }
     toast.success(`${product.name} agregado al carrito`);
   };
 
@@ -38,11 +47,12 @@ export function ProductCard({ product, onClickAddToCart, to }: Props) {
       <Card className="group border-border bg-card text-card-foreground hover:shadow-lg transition-all duration-300 flex flex-col h-full rounded-[var(--radius)]">
         <CardContent className="p-4 flex-1">
           <div className="aspect-square w-full mb-6 flex items-center justify-center overflow-hidden">
-            <img
-              src={product.image}
+            <MultiHostImage
+              path={product.image}
               alt={product.name}
               className="size-full object-contain group-hover:scale-105 transition-transform duration-500"
               />
+
           </div>
 
           <div className="text-center space-y-2">
@@ -50,8 +60,23 @@ export function ProductCard({ product, onClickAddToCart, to }: Props) {
             <h4 className="text-secondary text-sm font-medium line-clamp-1 px-2 group-hover:underline cursor-pointer">
               {product.name.toUpperCase()}
             </h4>
-            <p className="text-foreground text-lg font-black tracking-tight">
-              {product.price.toFixed(2)}
+            <p className="text-foreground text-lg font-black tracking-tight flex gap-1 justify-center items-start">
+              
+              {
+                product.sale_price && product.sale_price < product.price ? (
+                  <>
+                    <span>
+                      ${product.sale_price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                    </span>
+                    <span className="text-xs text-red-400 line-through">
+                      ${product.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                    </span>
+                  </>
+                ) : (
+                  <span>
+                    ${product.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                  </span>
+                )}
             </p>
           </div>
         </CardContent>
@@ -65,7 +90,12 @@ export function ProductCard({ product, onClickAddToCart, to }: Props) {
             disabled={isLoading}
           >
             <ShoppingCart size={18} strokeWidth={2.5} />
-            {isLoading ? 'Añadiendo...' : 'AÑADIR AL CARRITO'}
+            {isLoading ? 'Añadiendo...' : (
+              <span>
+                <span className="hidden md:inline">AÑADIR AL CARRITO</span>
+                <span className="md:hidden">AÑADIR</span>
+              </span>
+            )}
           </Button>
         </CardFooter>
       </Card>

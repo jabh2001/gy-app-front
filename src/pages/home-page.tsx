@@ -4,14 +4,7 @@ import CarouselWithFooter from "@/components/own/home/hero-carousel"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSettings, useCategories } from "@/hooks/api"
 import { Link } from "react-router-dom"
-
-const IMAGE_BASE = "http://127.0.0.1:5000"
-
-function resolveUrl(url: string): string {
-  if (!url) return ""
-  if (url.startsWith("http://") || url.startsWith("https://")) return url
-  return IMAGE_BASE + url
-}
+import { MultiHostImage } from "@/components/own/multi-host-image"
 
 export default function HomePage() {
   const { data: settings, isLoading } = useSettings()
@@ -62,17 +55,18 @@ export default function HomePage() {
 
   return (
     <div className="w-full space-y-8 pb-20">
-      <section className="relative w-full max-w-[100rem] mx-auto mt-4 flex items-center justify-center px-4">
+      <section className="relative w-full max-w-full md:max-w-[100rem] mx-auto mt-4 flex items-center justify-center px-4">
           <CarouselWithFooter images={heroImages} />
       </section>
 
       {bannerImages.length > 0 && (
-        <section className="max-w-[100rem] mx-auto px-4 mt-12">
+        <section className="max-w-full md:max-w-[100rem] mx-auto px-4 mt-12">
           <div className={`grid gap-6 ${bannerImages.length === 1 ? "grid-cols-1 max-w-2xl mx-auto" : "grid-cols-1 md:grid-cols-2"}`}>
             {bannerImages.map((url, i) => (
               <div key={i} className="rounded-2xl overflow-hidden shadow-xl hover:scale-[1.02] transition-transform cursor-pointer aspect-[16/9]">
-                <img
-                  src={resolveUrl(url)}
+                <MultiHostImage
+
+                  path={url}
                   alt={`Banner ${i + 1}`}
                   className="w-full h-full object-cover"
                 />
@@ -83,7 +77,7 @@ export default function HomePage() {
       )}
 
       {featuredCategories.length > 0 && (
-        <section className="max-w-[100rem] mx-auto px-4 mt-16 text-center">
+        <section className="max-w-full md:max-w-[100rem] mx-auto px-4 mt-16 text-center">
           <h3 className="text-sm font-bold uppercase tracking-[0.2em] relative inline-block mb-8">
             Categorías Destacadas
             <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary" />
@@ -104,7 +98,7 @@ export default function HomePage() {
         </section>
       )}
 
-      <section className="max-w-[100rem] mx-auto px-4 mt-16 text-center">
+      <section className="max-w-full md:max-w-[100rem] mx-auto px-4 mt-16 text-center">
         <h3 className="text-sm font-bold uppercase tracking-[0.2em] relative inline-block mb-12">
           Destacados
           <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary" />

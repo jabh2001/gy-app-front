@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MultiHostImage } from "@/components/own/multi-host-image"
 
 export function ProductGallery({ images }: { images: string[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -15,14 +16,14 @@ export function ProductGallery({ images }: { images: string[] }) {
             }`}
             onClick={() => setActiveIndex(index)}
           >
-            <img src={url} className="w-full h-full object-cover" alt="miniatura" />
+            <MultiHostImage path={url} className="w-full h-full object-cover" alt="miniatura" />
           </button>
         ))}
       </div>
 
       {/* Imagen Principal en el centro */}
       <div className="relative flex-1 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center min-h-[500px]">
-        <img src={images[activeIndex]} className="max-h-[500px] object-contain" alt="producto" />
+        <MultiHostImage path={images[activeIndex]} className="max-h-[500px] object-contain" alt="producto" />
         
         {/* Aquí irían tus botones flotantes de flecha izquierda/derecha si los deseas */}
       </div>

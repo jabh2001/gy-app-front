@@ -8,6 +8,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useCart } from '@/hooks/api/useCart';
+import { MultiHostImage } from '@/components/own/multi-host-image';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -53,8 +54,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   <X size={12} />
                 </button>
                 <div className="w-16 h-16 rounded-md overflow-hidden bg-slate-100">
-                  <img
-                    src={item.product?.main_image_url_path ?? item.product?.main_image ?? ''}
+                  <MultiHostImage
+                    path={item.product?.main_image ?? ''}
                     alt={item.product?.name ?? 'Producto'}
                     className="w-full h-full object-cover"
                   />

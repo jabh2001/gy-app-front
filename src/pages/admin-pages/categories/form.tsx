@@ -4,10 +4,7 @@ import { Button } from "@/components/ui/button"
 import CategoryForm from "@/components/own/forms/category-form"
 import type { CategoryFormData } from "@/components/own/forms/category-form"
 
-const mockCategories: CategoryFormData[] = [
-  { id: 1, name: "Camisetas", slug: "camisetas", description: "Ropa para hombre y mujer.", is_featured: true },
-  { id: 2, name: "Accesorios", slug: "accesorios", description: "Bolsos, gorras y complementos.", is_featured: false },
-]
+const mockCategories: CategoryFormData[] = []
 
 export default function CategoriesAdminForm() {
   const navigate = useNavigate()

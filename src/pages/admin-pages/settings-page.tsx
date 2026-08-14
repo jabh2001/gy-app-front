@@ -4,12 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import SettingsForm, { type SettingsFormData } from "@/components/own/forms/settings-form"
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<SettingsFormData>({
+  const [settings, setSettings] = useState({
     storeName: "GyApp Store",
     currency: "USD",
     taxRate: "21",
     supportEmail: "soporte@gyapp.com",
-  })
+    contact_email: "contacto@gyapp.com"
+  } as any)
   const [editing, setEditing] = useState(true)
 
   const handleSave = (updated: SettingsFormData) => {
@@ -57,7 +58,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {editing ? <SettingsForm data={settings} onSave={handleSave} onEdit={handleEdit} /> : null}
+      {editing ? <SettingsForm data={settings} onSave={handleSave as any} onEdit={handleEdit as any} /> : null}
     </div>
   )
 }

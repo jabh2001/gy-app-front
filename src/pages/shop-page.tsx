@@ -18,7 +18,7 @@ export default function ShopPage() {
 
   const pageNumbers = useMemo(() => generatePageNumbers(page, totalPages), [page, totalPages]);
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 bg-background text-foreground transition-colors">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 bg-white text-foreground transition-colors">
 
       {/* Categorías Superiores (Referencia image_794016.png) */}
       {/* <section className="space-y-4 hidden">
@@ -106,16 +106,19 @@ export default function ShopPage() {
                     id: product.id,
                     name: product.name,
                     price: product.price,
-                    image: product.main_image_url_path ?? ""
+                    sale_price: product.is_on_sale ? product.sale_price : null,
+                    image: product.main_image ?? ""
                   }}
                 /> :
                   <ProductListItem
                     key={product.id}
+                    to={`/shop/product/${product.id}`}
                     product={{
                       id: product.id,
                       name: product.name,
                       price: product.price,
-                      image: product.main_image_url_path ?? "",
+                      sale_price: product.is_on_sale ? product.sale_price : null,
+                      image: product.main_image ?? "",
                       description: product.description ?? ""
                     }}
                   />

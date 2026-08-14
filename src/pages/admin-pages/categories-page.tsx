@@ -3,10 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import CategoryForm, { type CategoryFormData } from "@/components/own/forms/category-form"
 
-const initialCategories: CategoryFormData[] = [
-  { id: 1, name: "Camisetas", slug: "camisetas", description: "Ropa para hombre y mujer.", is_featured: true },
-  { id: 2, name: "Accesorios", slug: "accesorios", description: "Bolsos, gorras y complementos.", is_featured: false },
-]
+const initialCategories: CategoryFormData[] = []
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<CategoryFormData[]>(initialCategories)

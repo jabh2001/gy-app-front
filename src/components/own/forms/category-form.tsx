@@ -38,7 +38,7 @@ export default function CategoryForm({ data, onSave, onEdit, onToggleSave, submi
     is_active: true,
   })
   const slugManuallyEdited = useRef(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>( null)
   const onToggleSaveRef = useRef(onToggleSave)
   onToggleSaveRef.current = onToggleSave
   const dataIdRef = useRef(data?.id)

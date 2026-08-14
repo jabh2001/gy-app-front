@@ -39,7 +39,7 @@ export default function MainLayout() {
                     <div className="flex flex-wrap items-center justify-center gap-6">
                         <HeaderLink to="/">Inicio</HeaderLink>
                         <HeaderLink to="/shop">Tienda</HeaderLink>
-                        <HeaderLink to="/about">Nosotros</HeaderLink>
+                        {/* <HeaderLink to="/about">Nosotros</HeaderLink> */}
                         <HeaderLink to="/contact">Contacto</HeaderLink>
                     </div>
                 </div>

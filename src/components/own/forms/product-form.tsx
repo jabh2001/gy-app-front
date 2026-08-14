@@ -61,7 +61,7 @@ export default function ProductForm({ data, onSave, onEdit, onToggleSave, submit
     data?.images?.map((file) => URL.createObjectURL(file)) ?? []
   )
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
   const previewsRef = useRef<string[]>(imagePreviews)
 
   useEffect(() => {

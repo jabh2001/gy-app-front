@@ -6,6 +6,7 @@ import {
 import { Card } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
 import type { Product } from "@/api/models"
+import { MultiHostImage } from '@/components/own/multi-host-image';
 
 type Props = {
     product: Product
@@ -19,7 +20,7 @@ export default function ProductCard({ product }: Props) {
         >
             <div className="flex gap-4 p-4">
                 <div className="flex h-20 w-20 shrink-0 items-center justify-center border border-border/60 bg-muted/60 text-muted-foreground shadow-inner">
-                    <img src={product.main_image_url_path!} alt={product.name} className="h-full w-full object-cover" />
+                    <MultiHostImage path={product.main_image ?? ""} alt={product.name} className="h-full w-full object-cover" />
                 </div>
 
                 <div className="min-w-0 flex-1 space-y-2">

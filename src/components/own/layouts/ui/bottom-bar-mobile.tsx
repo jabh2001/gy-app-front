@@ -1,12 +1,22 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Search, User, Home, Zap, X } from 'lucide-react'
 import { Link } from "react-router-dom"
 import GlobalSearch from "@/components/own/GlobalSearch"
 import { useSession } from "@/hooks/use-session"
+import { useBackAndEscape } from "@/hooks/use-back-and-scape"
 
 function BottomBarMobile() {
     const user = useSession((s) => s.user)
     const [searchOpen, setSearchOpen] = useState(false)
+
+    useEffect(() => {
+        if (searchOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'auto'
+        }
+    }, [searchOpen])
+    useBackAndEscape(() => setSearchOpen(false), searchOpen)
 
     return (
         <>
@@ -37,10 +47,21 @@ function BottomBarMobile() {
             </div>
 
             {searchOpen && (
-                <div className="absolute inset-0 z-[100] flex flex-col bg-black/60 backdrop-blur-sm w-screen h-screen">
+                <div className="fixed inset-0 z-[100] flex flex-col bg-black/60 backdrop-blur-sm w-full h-full">
                     <div className="flex items-start justify-between bg-background p-2 w-full">
                         <div className="flex-1">
-                            <GlobalSearch category={false} />
+                            <GlobalSearch
+                                category={false}
+                                showCategoryList={false}
+                                showProductList={true}
+                                onSearchSubmit={(term) => {
+                                    setTimeout(() => {
+                                        setSearchOpen(false)
+                                    }, 100)
+                                    // setSearchOpen(false)
+                                    console.log("Search submitted " + term)
+                                }}
+                            />
                         </div>
                         <button
                             onClick={() => setSearchOpen(false)}

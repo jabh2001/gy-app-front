@@ -17,7 +17,7 @@ export default function FormTabs({ product }: { product: Product }) {
                 { id: "Datos", label: "Datos", content: <EditForm product={product} /> },
                 { id: "imagenes", label: "Imagenes", content: <ImagesSection product={product} /> },
                 { id: "Categorias", label: "Categorias", content: <CategoriesSection product={product} /> },
-                { id: "Palabras clave", label: "Palabras clave", content: <>Palabras clave</> },
+                // { id: "Palabras clave", label: "Palabras clave", content: <>Palabras clave</> },
             ]}
         />
     )

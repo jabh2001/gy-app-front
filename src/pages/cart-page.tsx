@@ -161,7 +161,15 @@ export default function CartPage() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <p className="text-sm text-slate-600">No tienes perfiles de facturación guardados.</p>
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex h-6 w-6">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white animate-bounce">
+                            !
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-600">No tienes perfiles de facturación guardados.</p>
+                      </div>
                       <Link to="/profile" className="text-sm font-medium text-primary underline">Agregar uno en tu perfil</Link>
                     </div>
                   )}
@@ -187,7 +195,7 @@ export default function CartPage() {
                   </label>
                 </div>
 
-                <Button type="submit" disabled={checkout.isLoading || cartLoading || !cart?.items.length}>
+                <Button type="submit" disabled={checkout.isLoading || cartLoading || !cart?.items.length || !billingData || billingData.length === 0}>
                   {checkout.isLoading ? 'Procesando...' : 'Finalizar compra'}
                 </Button>
               </form>

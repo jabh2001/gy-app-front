@@ -26,10 +26,7 @@ import {
   User,
   Phone,
   MapPin,
-  FileText,
-  Printer,
   Package,
-  MessageCircle,
   XCircle,
   RefreshCcw,
   Truck,
@@ -151,11 +148,11 @@ export default function OrderDetailPage() {
     if (order?.status) setStatusValue(order.status)
   }, [order?.status])
 
-  const canCancel = !!order && !['cancelled', 'cancelado'].includes(normalizeStatus(order.status))
+  const canCancel = !!order && !['cancelled', 'cancelado', 'completed', 'invoiced'].includes(normalizeStatus(order.status))
   const canUpdateStatus = isAdmin && !!order && !['cancelled', 'cancelado'].includes(normalizeStatus(order.status))
 
   const whatsappUrl = useMemo(() => {
-    if (!order || !settings?.order_whatsapp) return null
+    if (!order || !settings?.order_whatsapp || settings.order_whatsapp != "pending") return null
     return buildWhatsAppUrl(settings.order_whatsapp, order)
   }, [order, settings?.order_whatsapp])
 
@@ -247,7 +244,7 @@ export default function OrderDetailPage() {
                 </a>
               </Button>
             )}
-            <Button variant="secondary" asChild>
+            {/* <Button variant="secondary" asChild>
               <a href={`/api/orders/${orderId}/invoice/`} target="_blank" rel="noreferrer">
                 <FileText className="size-4 mr-2" />
                 Factura
@@ -256,7 +253,7 @@ export default function OrderDetailPage() {
             <Button variant="outline" onClick={() => window.print()}>
               <Printer className="size-4 mr-2" />
               Imprimir
-            </Button>
+            </Button> */}
             {canCancel && (
               <Button
                 variant="destructive"
@@ -294,7 +291,7 @@ export default function OrderDetailPage() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
                     <CardTitle className="text-2xl">Pedido #{order.id}</CardTitle>
-                    <Badge variant={cfg.variant} className="gap-1 capitalize text-sm">
+                    <Badge variant={cfg.variant as any} className="gap-1 capitalize text-sm">
                       <StatusIcon className="size-3.5" />
                       {cfg.label}
                     </Badge>

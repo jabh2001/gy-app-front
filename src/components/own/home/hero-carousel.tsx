@@ -5,15 +5,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import { MultiHostImage } from "@/components/own/multi-host-image"
 import Autoplay from "embla-carousel-autoplay"
-
-const IMAGE_BASE = "http://127.0.0.1:5000"
-
-function resolveUrl(url: string): string {
-  if (!url) return ""
-  if (url.startsWith("http://") || url.startsWith("https://")) return url
-  return IMAGE_BASE + url
-}
 
 interface CarouselWithFooterProps {
   images: string[]
@@ -34,10 +27,10 @@ export default function CarouselWithFooter({ images }: CarouselWithFooterProps) 
         <CarouselContent>
           {images.map((url, i) => (
             <CarouselItem key={i} className="aspect-[16/8] md:aspect-[21/9]">
-              <img
-                src={resolveUrl(url)}
-                alt={`Hero ${i + 1}`}
-                className="object-cover w-full h-full rounded-xl"
+              <MultiHostImage
+                path={url}
+                alt={`Banner ${i + 1}`}
+                className="w-full h-full object-cover"
               />
             </CarouselItem>
           ))}

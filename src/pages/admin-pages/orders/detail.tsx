@@ -22,8 +22,6 @@ import {
   User,
   Phone,
   MapPin,
-  FileText,
-  Printer,
   Package,
   XCircle,
   RefreshCcw,
@@ -32,6 +30,7 @@ import {
   DollarSign,
   ShoppingBag,
 } from "lucide-react"
+import { MultiHostImage } from '@/components/own/multi-host-image';
 
 const ORDER_STATUSES = [
   { value: 'pending', label: 'Pendiente', icon: Clock },
@@ -135,7 +134,7 @@ export default function OrdersAdminDetail() {
             <ArrowLeft className="size-4 mr-2" />
             Volver
           </Button>
-          <Button variant="secondary" asChild>
+          {/* <Button variant="secondary" asChild>
             <a href={`/api/orders/${orderId}/invoice/`} target="_blank" rel="noreferrer">
               <FileText className="size-4 mr-2" />
               Factura
@@ -144,7 +143,7 @@ export default function OrdersAdminDetail() {
           <Button variant="outline" onClick={() => window.print()}>
             <Printer className="size-4 mr-2" />
             Imprimir
-          </Button>
+          </Button> */}
           {canCancel && (
             <Button variant="destructive" onClick={handleCancel} disabled={cancelOrder.isLoading}>
               <XCircle className="size-4 mr-2" />
@@ -177,7 +176,7 @@ export default function OrdersAdminDetail() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <CardTitle className="text-2xl">Pedido #{order.id}</CardTitle>
-                <Badge variant={cfg.variant} className="gap-1 capitalize text-sm">
+                <Badge variant={cfg.variant as any} className="gap-1 capitalize text-sm">
                   <StatusIcon className="size-3.5" />
                   {cfg.label}
                 </Badge>
@@ -284,9 +283,9 @@ export default function OrdersAdminDetail() {
                     className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-[auto_1fr_auto] items-center"
                   >
                     <div className="size-12 rounded-xl border border-border bg-muted overflow-hidden shrink-0">
-                      {item.product?.main_image_url_path ? (
-                        <img
-                          src={item.product.main_image_url_path}
+                      {item.product?.main_image ? (
+                        <MultiHostImage
+                          path={item.product.main_image}
                           alt={item.product.name}
                           className="size-full object-cover"
                         />

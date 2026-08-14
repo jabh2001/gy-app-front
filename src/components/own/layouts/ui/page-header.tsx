@@ -6,16 +6,13 @@ import { AccountDrawer } from '@/components/own/account-drawer';
 import { useSession } from '@/hooks/use-session';
 import GlobalSearch from '@/components/own/GlobalSearch';
 import { useCart } from '@/hooks/api/useCart';
-import { useSettings } from '@/hooks/api';
-import Logo from '@/../public/tech3.png';
-import Logo2 from '@/../public/tech2.png';
+import Logo2 from '@/assets/tech2.png';
 
 function PageHeader() {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isAccountOpen, setIsAccountOpen] = useState(false);
     const user = useSession(session => session.user);
     const { cart } = useCart();
-    const { data: settings } = useSettings();
 
     return (
             <header className="bg-primary/95 text-white shadow-sm">
@@ -32,9 +29,11 @@ function PageHeader() {
                                 type="button"
                                 onClick={() => setIsCartOpen(true)}
                                 aria-label="Abrir carrito"
-                                className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white transition hover:border-primary hover:bg-white/10"
+                                className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white transition hover:border-primary hover:bg-white/10"
                             >
                                 <ShoppingCart size={20} />
+                                <span className="absolute -top-2 -right-2 rounded-full bg-white px-1.5 text-[10px] font-bold text-primary">{cart?.items.length ?? 0}</span>
+
                             </button>
                             <button
                                 type="button"

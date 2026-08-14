@@ -32,7 +32,6 @@ import {
   CreditCard,
   DollarSign,
   ShoppingBag,
-  RefreshCcw,
 } from "lucide-react"
 
 const ORDER_STATUSES = [
@@ -212,7 +211,7 @@ export default function OrdersAdminIndex() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={cfg.variant} className="gap-1 capitalize">
+                          <Badge variant={cfg.variant as any} className="gap-1 capitalize">
                             <StatusIcon className="size-3" />
                             {cfg.label}
                           </Badge>

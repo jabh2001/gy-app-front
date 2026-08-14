@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:is(.dark *));
+/* @custom-variant dark (&:is(.dark *)); */
+@variant dark (false);
 
 :root {
   --background: rgb(252, 252, 252);
@@ -55,7 +56,7 @@
   --spacing: 0.25rem;
 }
 
-.dark {
+.darkk {
   --background: rgb(0, 0, 0);
   --foreground: rgb(255, 255, 255);
   --card: rgb(15, 15, 15);

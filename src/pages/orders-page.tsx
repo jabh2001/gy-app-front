@@ -24,8 +24,8 @@ import {
   CheckCircle2,
   CreditCard,
   XCircle,
-  FileText,
 } from 'lucide-react'
+import { MultiHostImage } from '@/components/own/multi-host-image';
 
 const ORDER_STATUSES = [
   { value: 'all', label: 'Todos' },
@@ -212,7 +212,7 @@ export default function OrdersPage() {
                                 Pedido #{order.id}
                               </h3>
                             </div>
-                            <Badge variant={cfg.variant} className="gap-1 capitalize">
+                            <Badge variant={cfg.variant as any} className="gap-1 capitalize">
                               <StatusIcon className="size-3" />
                               {cfg.label}
                             </Badge>
@@ -240,8 +240,8 @@ export default function OrdersPage() {
                                   key={item.id}
                                   className="size-8 rounded-full border-2 border-background bg-muted overflow-hidden"
                                 >
-                                  {item.product?.main_image_url_path ? (
-                                    <img src={item.product.main_image_url_path} alt="" className="size-full object-cover" />
+                                  {item.product?.main_image ? (
+                                    <MultiHostImage path={item.product.main_image} alt="" className="size-full object-cover" />
                                   ) : (
                                     <div className="size-full flex items-center justify-center text-xs text-muted-foreground font-bold">
                                       {item.product?.name?.charAt(0) || '?'}

@@ -246,7 +246,7 @@ export default function ProfilePage() {
                     </label>
 
                     <label className="grid gap-2 text-sm font-medium">
-                      RIF
+                      RIF / Cedula
                       <Input
                         value={billingForm.rif}
                         onChange={(event) => setBillingForm((prev) => ({ ...prev, rif: event.target.value }))}

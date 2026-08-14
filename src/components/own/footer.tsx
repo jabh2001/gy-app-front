@@ -1,20 +1,23 @@
-import { useState } from "react";
-import { toast } from "sonner";
-import { CrossIcon, ArrowRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { useSettings } from "@/hooks/api";
+import {
+  FacebookLogoIcon,
+  InstagramLogoIcon,
+  TwitterLogoIcon,
+  TiktokLogoIcon,
+  YoutubeLogoIcon,
+  LinkedinLogoIcon,
+  WhatsappLogoIcon,
+  TelegramLogoIcon,
+  GithubLogoIcon,
+  DiscordLogoIcon,
+} from "@phosphor-icons/react"
+import { Globe } from "lucide-react"
 
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
   const { data: settings } = useSettings()
   const floatingWhatsapp = settings?.floating_whatsapp
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.info("Función de newsletter próximamente disponible.");
-    setEmail("");
-  };
+  const socialLinks = settings?.social_links || []
 
   return (
     <footer className="bg-muted text-muted-foreground pt-12 pb-6 px-4 md:px-12 transition-colors duration-300">
@@ -33,34 +36,31 @@ export default function Footer() {
           <div className="space-y-6">
             <h4 className="text-foreground font-bold uppercase tracking-tight">Conócenos</h4>
             <p className="text-sm leading-relaxed">
-              Tu tienda de electrónica de confianza, trayéndote lo último en tecnología a los mejores precios. Desde gadgets hasta gaming, entregamos en todo el país.
+              Tu hogar, equipado con la mejor tecnología.
+              Somos tu tienda de confianza en electrodomésticos.
+              Encuentra neveras, lavadoras, equipos de cocina y soluciones para el hogar de las mejores marcas con garantía y envío a domicilio.
             </p>
             <p className="text-sm font-medium">
               Av. Principal, Centro Comercial, Piso 1. Caracas, Venezuela.
             </p>
-            <div className="flex gap-4 text-foreground">
-              <CrossIcon className="cursor-pointer hover:text-primary transition-colors" size={20} />
-              <CrossIcon className="cursor-pointer hover:text-primary transition-colors" size={20} />
-              <CrossIcon className="cursor-pointer hover:text-primary transition-colors" size={20} />
-            </div>
+            {socialLinks.length > 0 && (
+              <div className="space-y-3 flex gap-4">
+                {socialLinks.map((link, i) => {
+                  const IconComponent = getSocialIcon(link.name || link.platform || "")
+                  return (
+                    <a key={i} href={link.url || ""} target="_blank" rel="noopener noreferrer" className="">
+                      {IconComponent ? <IconComponent size={36} /> : <Globe size={18} />}
+                    </a>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           <div className="space-y-6"></div>
 
           <div className="space-y-6">
-            <h4 className="text-foreground font-bold uppercase tracking-tight">Suscríbete</h4>
-            <p className="text-sm">Regístrese para recibir ofertas exclusivas, historias originales, eventos y más.</p>
-            <form onSubmit={handleSubscribe} className="relative group max-w-xs">
-              <Input 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Su correo electrónico" 
-                className="bg-background border-border rounded-full pr-12 focus-visible:ring-primary h-12"
-              />
-              <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground group-hover:translate-x-1 transition-transform">
-                <ArrowRight size={20} />
-              </button>
-            </form>
+            
           </div>
         </div>
 
@@ -68,14 +68,26 @@ export default function Footer() {
           <div className="space-y-4">
             <h4 className="text-foreground font-bold uppercase tracking-tight">Conócenos</h4>
             <p className="text-sm leading-relaxed">
-              Tu tienda de electrónica de confianza, trayéndote lo último en tecnología a los mejores precios. Desde gadgets hasta gaming, entregamos en todo el país.
+              Tu hogar, equipado con la mejor tecnología.
+              Somos tu tienda de confianza en electrodomésticos.
+              Encuentra neveras, lavadoras, equipos de cocina y soluciones para el hogar de las mejores marcas con garantía y envío a domicilio.
             </p>
             <p className="text-xs">
               Av. Principal, Centro Comercial, Piso 1. Caracas, Venezuela.
             </p>
-            <div className="flex gap-6 text-foreground pt-2">
-              <CrossIcon size={24} /> <CrossIcon size={24} /> <CrossIcon size={24} />
-            </div>
+            
+            {socialLinks.length > 0 && (
+              <div className="space-y-3 flex gap-4">
+                {socialLinks.map((link, i) => {
+                  const IconComponent = getSocialIcon(link.name || link.platform || "")
+                  return (
+                    <a key={i} href={link.url || ""} target="_blank" rel="noopener noreferrer" className="">
+                      {IconComponent ? <IconComponent size={36} /> : <Globe size={18} />}
+                    </a>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
         </div>
@@ -101,4 +113,23 @@ export default function Footer() {
       )}
     </footer>
   );
+}
+
+
+const SOCIAL_ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
+  facebook: FacebookLogoIcon,
+  instagram: InstagramLogoIcon,
+  twitter: TwitterLogoIcon,
+  tiktok: TiktokLogoIcon,
+  youtube: YoutubeLogoIcon,
+  linkedin: LinkedinLogoIcon,
+  whatsapp: WhatsappLogoIcon,
+  telegram: TelegramLogoIcon,
+  github: GithubLogoIcon,
+  discord: DiscordLogoIcon,
+}
+
+function getSocialIcon(name: string): React.ComponentType<{ size?: number }> | null {
+  const key = name.toLowerCase()
+  return SOCIAL_ICON_MAP[key] || null
 }

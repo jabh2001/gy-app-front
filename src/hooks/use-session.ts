@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { login as loginRequest, logout as logoutRequest, register as registerRequest, profile as profileRequest, updateProfile as updateProfileRequest, clearSession as clearSessionRequest, type AuthLoginPayload, type AuthRegisterPayload } from '@/api/auth';
-import { normalizeApiError, showApiError } from '@/api/index';
+import { normalizeApiError } from '@/api/index';
 import type { User } from '@/api/models';
 
 const SESSION_STORAGE_KEY = 'gy_app_user_session';
